@@ -74,7 +74,7 @@ export default function AddIncomePage() {
       await addTransaction({
         type: 'income',
         amount: parseFloat(formData.amount),
-        date: new Date(formData.date),
+        date: new Date(formData.date).toISOString(),
         categoryId: formData.categoryId || null,
         merchant: formData.merchant || null,
         paymentMethod: formData.paymentMethod || null,

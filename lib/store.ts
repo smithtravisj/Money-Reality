@@ -31,20 +31,20 @@ interface AppStore {
   setError: (error: string | null) => void;
 
   // Transactions CRUD
-  addTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   getTransactionsByCategory: (categoryId: string) => Transaction[];
   getTransactionsByDateRange: (startDate: Date, endDate: Date) => Transaction[];
 
   // Categories CRUD
-  addCategory: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addCategory: (category: Omit<Category, 'id' | 'userId' | 'order' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   getCategories: (type: 'expense' | 'income' | 'all') => Category[];
 
   // Weekly Check-ins CRUD
-  addWeeklyCheckin: (checkin: Omit<WeeklyCheckin, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addWeeklyCheckin: (checkin: Omit<WeeklyCheckin, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateWeeklyCheckin: (id: string, checkin: Partial<WeeklyCheckin>) => Promise<void>;
   getWeeklyCheckins: () => WeeklyCheckin[];
 

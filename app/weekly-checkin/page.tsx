@@ -70,8 +70,8 @@ export default function WeeklyCheckinPage() {
 
     try {
       await addWeeklyCheckin({
-        weekStartDate: monday,
-        weekEndDate: sunday,
+        weekStartDate: monday.toISOString(),
+        weekEndDate: sunday.toISOString(),
         totalIncome: weekData.income,
         totalExpenses: weekData.expenses,
         netChange: weekData.netChange,
@@ -90,7 +90,6 @@ export default function WeeklyCheckinPage() {
   };
 
   const monthData = getMonthSpending(transactions);
-  const currentCheckin = weeklyCheckins.length > 0 ? weeklyCheckins[0] : null;
 
   return (
     <div style={{ padding: 'var(--card-padding)' }} className="page-container-narrow">
