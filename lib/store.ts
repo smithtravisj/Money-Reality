@@ -215,10 +215,10 @@ const useAppStore = create<AppStore>((set, get) => ({
       set({ error: null });
     } catch (error) {
       // Rollback
-      set((state) => ({
+      set({
         transactions: oldTransactions,
         error: 'Failed to delete transaction',
-      }));
+      });
       throw error;
     }
   },
@@ -326,10 +326,10 @@ const useAppStore = create<AppStore>((set, get) => ({
 
       set({ error: null });
     } catch (error) {
-      set((state) => ({
+      set({
         categories: oldCategories,
         error: 'Failed to delete category',
-      }));
+      });
       throw error;
     }
   },
@@ -443,10 +443,10 @@ const useAppStore = create<AppStore>((set, get) => ({
 
       set({ settings: updated, error: null });
     } catch (error) {
-      set((state) => ({
+      set({
         settings: oldSettings,
         error: 'Failed to update settings',
-      }));
+      });
       throw error;
     }
   },
