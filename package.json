@@ -2,6 +2,7 @@
   "name": "money-reality",
   "version": "1.0.0",
   "description": "A personal budget tracker - your financial truth mirror",
+  "type": "module",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "prisma generate && next build",
