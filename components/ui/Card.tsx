@@ -10,6 +10,7 @@ interface CardProps {
   children: React.ReactNode;
   hoverable?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -19,9 +20,10 @@ const Card: React.FC<CardProps> = ({
   children,
   hoverable = false,
   className = '',
+  style = {},
 }) => {
   return (
-    <div className={`${styles.card} ${hoverable ? styles.hoverable : ''} ${className}`}>
+    <div className={`${styles.card} ${hoverable ? styles.hoverable : ''} ${className}`} style={style}>
       {title && (
         <div className={styles.header}>
           <div className={styles.headerContent}>
