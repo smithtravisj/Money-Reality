@@ -6,7 +6,7 @@ import LayoutWrapper from '@/components/LayoutWrapper';
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
@@ -16,8 +16,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'College Survival Tool',
-  description: 'A personal, privacy-first college dashboard',
+  title: 'Money Reality',
+  description: 'Your personal budget tracker - honest financial truth',
   icons: {
     icon: '/favicon.svg',
     apple: '/apple-touch-icon.png',
@@ -36,7 +36,7 @@ export default function RootLayout({
         <meta name="color-scheme" content="dark" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <meta name="apple-mobile-web-app-title" content="College Survival" />
+        <meta name="apple-mobile-web-app-title" content="Money Reality" />
         <meta name="theme-color" content="#0b0f14" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />

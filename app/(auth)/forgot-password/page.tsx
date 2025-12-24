@@ -2,119 +2,109 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const response = await fetch('/api/user/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong');
-        setLoading(false);
-        return;
+      if (response.ok) {
+        setMessage('If an account exists with this email, you will receive password reset instructions shortly.');
+        setEmail('');
+      } else {
+        const data = await response.json();
+        setError(data.message || 'An error occurred. Please try again.');
       }
-
-      setSubmitted(true);
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      setError('An error occurred. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
-          College Survival Tool
-        </h1>
-        <p style={{ color: 'var(--text)', marginBottom: '8px', fontSize: '18px' }}>Reset your password</p>
-      </div>
-
-      <Card>
-        {submitted ? (
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>✉️</div>
-              <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
-                Check your email
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>
-                We've sent a password reset link to <strong>{email}</strong>. The link will expire in 1 hour.
-              </p>
-            </div>
-
-            <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
-              <Link
-                href="/login"
-                style={{ display: 'block', textAlign: 'center', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600, filter: 'brightness(1.6)' }}
-              >
-                Back to sign in
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {error && (
-              <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '8px', padding: '12px' }}>
-                <p style={{ fontSize: '14px', color: 'rgb(239, 68, 68)' }}>{error}</p>
-              </div>
-            )}
-
-            <div>
-              <label style={{ display: 'block', fontSize: '15px', fontWeight: 500, color: 'var(--text)', marginBottom: '6px' }}>
-                Email
-              </label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                disabled={loading}
-                style={{ width: '100%' }}
-              >
-                {loading ? 'Sending...' : 'Send Reset Link'}
-              </Button>
-            </div>
-          </form>
-        )}
-
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <p style={{ fontSize: '14px', color: 'var(--text)' }}>
-            Remember your password?{' '}
-            <Link
-              href="/login"
-              style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600, filter: 'brightness(1.6)' }}
-            >
-              Sign in
-            </Link>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 'var(--space-3)' }}>
+      <Card style={{ width: '100%', maxWidth: '450px' }}>
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--text)', margin: '0 0 var(--space-1) 0' }}>
+            Reset Password
+          </h1>
+          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', margin: '0' }}>
+            Enter your email and we'll send you a reset link
           </p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          {error && (
+            <div
+              style={{
+                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: 'var(--status-danger-bg)',
+                color: 'var(--status-danger)',
+                borderRadius: 'var(--radius-control)',
+                fontSize: 'var(--font-size-sm)',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {message && (
+            <div
+              style={{
+                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: 'var(--status-safe-bg)',
+                color: 'var(--status-safe)',
+                borderRadius: 'var(--radius-control)',
+                fontSize: 'var(--font-size-sm)',
+              }}
+            >
+              {message}
+            </div>
+          )}
+
+          <Input
+            label="Email Address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            disabled={loading || !!message}
+          />
+
+          <Button type="submit" variant="primary" size="lg" loading={loading} disabled={!!message} style={{ marginTop: 'var(--space-2)' }}>
+            Send Reset Link
+          </Button>
+        </form>
+
+        <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border)' }}>
+          <Link href="/login" style={{ display: 'block', color: 'var(--accent)', textDecoration: 'none', fontSize: 'var(--font-size-sm)', fontWeight: '500', textAlign: 'center' }}>
+            Back to Sign In
+          </Link>
         </div>
       </Card>
     </div>

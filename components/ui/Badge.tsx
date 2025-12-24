@@ -1,24 +1,17 @@
 import React from 'react';
+import styles from './Badge.module.css';
 
 interface BadgeProps {
-  variant?: 'success' | 'warning' | 'danger' | 'neutral';
+  variant?: 'success' | 'warning' | 'danger' | 'neutral' | 'info';
   children: React.ReactNode;
   className?: string;
 }
 
 const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', children, className = '' }) => {
-  const variantStyles = {
-    success: 'bg-[rgba(87,171,90,0.2)] text-[var(--success)] border border-[var(--success)]',
-    warning: 'bg-[rgba(198,144,38,0.2)] text-[var(--warning)] border border-[var(--warning)]',
-    danger: 'bg-[rgba(229,83,75,0.2)] text-[var(--danger)] border border-[var(--danger)]',
-    neutral: 'bg-[var(--panel-2)] text-[var(--text-secondary)] border border-[var(--border)]',
-  };
+  const variantClass = styles[`variant-${variant}`] || styles['variant-neutral'];
 
   return (
-    <span
-      className={`inline-flex items-center rounded-[var(--radius-xs)] text-xs font-medium ${variantStyles[variant]} ${className}`}
-      style={{ padding: '4px 8px' }}
-    >
+    <span className={`${styles.badge} ${variantClass} ${className}`}>
       {children}
     </span>
   );

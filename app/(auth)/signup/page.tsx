@@ -1,336 +1,182 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
-import { getCollegeColorPalette } from '@/lib/collegeColors';
-
-const UNIVERSITIES = [
-  'Arizona State University',
-  'Brigham Young University',
-  'Brigham Young University Hawaii',
-  'Brigham Young University Idaho',
-  'Ohio State University',
-  'UNC Chapel Hill',
-  'University of Central Florida',
-  'University of Texas at Austin',
-  'Utah State University',
-  'Utah Valley University',
-];
-
-// College name abbreviations for display
-const COLLEGE_ABBREVIATIONS: Record<string, string> = {
-  'Brigham Young University': 'BYU',
-  'Brigham Young University Idaho': 'BYUI',
-  'Brigham Young University Hawaii': 'BYUH',
-  'UNC Chapel Hill': 'UNC',
-  'Utah State University': 'USU',
-  'Utah Valley University': 'UVU',
-  'Arizona State University': 'ASU',
-  'University of Central Florida': 'UCF',
-  'Ohio State University': 'OSU',
-};
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [university, setUniversity] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: '',
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [collegeRequestName, setCollegeRequestName] = useState('');
-  const [collegeButtonColor, setCollegeButtonColor] = useState('');
 
-  const handleUniversityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedUni = e.target.value;
-    setUniversity(selectedUni);
-
-    // Get the college-specific dark mode accent color
-    if (selectedUni) {
-      const palette = getCollegeColorPalette(selectedUni, 'dark');
-      setCollegeButtonColor(palette.accent);
-    } else {
-      setCollegeButtonColor('');
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validation
+    if (!formData.email || !formData.password || !formData.name) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // 1. Create user account
-      const signupRes = await fetch('/api/user/signup', {
+      const response = await fetch('/api/user/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, university }),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+        }),
       });
 
-      if (!signupRes.ok) {
-        const { error } = await signupRes.json();
-        setError(error || 'We couldn\'t create your account. Please try again.');
-        setLoading(false);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Failed to create account');
         return;
       }
 
-      // 2. Sign in the user
+      // Sign in after successful signup
       const signInResult = await signIn('credentials', {
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
         redirect: false,
       });
 
-      if (signInResult?.error) {
-        setError('Account created but sign in failed. Please try logging in.');
-        setLoading(false);
-        return;
+      if (signInResult?.ok) {
+        router.push('/');
+      } else {
+        // Account created but sign in failed, redirect to login
+        router.push('/login');
       }
-
-      // 3. If there's a college request, submit it after authentication
-      if (collegeRequestName.trim()) {
-        try {
-          const collegeRes = await fetch('/api/college-requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ collegeName: collegeRequestName }),
-          });
-
-          if (!collegeRes.ok) {
-            console.error('College request failed but continuing with signup');
-          }
-        } catch (collegeError) {
-          console.error('College request error:', collegeError);
-          // Don't block signup if college request fails
-        }
-      }
-
-      // Clear any existing local data for a fresh start
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('byu-survival-tool-data');
-      }
-
-      // Redirect to dashboard
-      router.push('/');
-      router.refresh();
-    } catch (error) {
-      setError('Something went wrong. Please check your connection and try again.');
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 600, color: 'var(--text)', marginBottom: '8px' }}>
-          {university ? `${COLLEGE_ABBREVIATIONS[university]} Survival Tool` : 'College Survival Tool'}
-        </h1>
-        <p style={{ color: 'var(--text)', marginBottom: '6px', fontSize: '15px' }}>Create your account</p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 'var(--space-3)' }}>
+      <Card style={{ width: '100%', maxWidth: '450px' }}>
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--text)', margin: '0 0 var(--space-1) 0' }}>
+            Create Account
+          </h1>
+          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', margin: '0' }}>
+            Start tracking your finances honestly
+          </p>
+        </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           {error && (
-            <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '8px', padding: '10px' }}>
-              <p style={{ fontSize: '13px', color: 'rgb(239, 68, 68)' }}>{error}</p>
-            </div>
-          )}
-
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text)', marginBottom: '4px' }}>
-              Name
-            </label>
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text)', marginBottom: '4px' }}>
-              Email
-            </label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text)', marginBottom: '4px' }}>
-              Password
-            </label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              minLength={8}
-            />
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              At least 8 characters
-            </p>
-          </div>
-
-          <div style={{ position: 'relative' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text)', marginBottom: '4px' }}>
-              University
-            </label>
-            <select
-              value={university}
-              onChange={handleUniversityChange}
-              style={{
-                width: '100%',
-                padding: '12px 30px 12px 12px',
-                backgroundColor: 'var(--panel-2)',
-                border: '1px solid var(--border)',
-                color: university ? 'var(--text)' : 'var(--text-muted)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '14px',
-                fontFamily: 'inherit',
-                appearance: 'none',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
-              }}
-            >
-              <option value="">Select University</option>
-              {UNIVERSITIES.map((uni) => (
-                <option key={uni} value={uni}>
-                  {uni}
-                </option>
-              ))}
-            </select>
             <div
               style={{
-                position: 'absolute',
-                right: '18px',
-                top: '52px',
-                pointerEvents: 'none',
+                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: 'var(--status-danger-bg)',
+                color: 'var(--status-danger)',
+                borderRadius: 'var(--radius-control)',
+                fontSize: 'var(--font-size-sm)',
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)">
-                <path d="M4 6l4 4 4-4" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
-
-          {!university && (
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text)', marginBottom: '4px' }}>
-                Don't see your university?
-              </label>
-              <input
-                type="text"
-                value={collegeRequestName}
-                onChange={(e) => setCollegeRequestName(e.target.value)}
-                placeholder="Request university"
-                maxLength={100}
-                style={{
-                  width: '100%',
-                  height: '44px',
-                  padding: '12px 12px',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  backgroundColor: 'var(--panel-2)',
-                  color: 'var(--text)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '6px',
-                  boxSizing: 'border-box'
-                }}
-                disabled={loading}
-              />
+              {error}
             </div>
           )}
 
-          {/* Privacy Policy & Terms Consent */}
-          <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                required
-                style={{
-                  width: '16px',
-                  height: '16px',
-                  cursor: 'pointer',
-                  marginTop: '2px',
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                I agree to the{' '}
-                <Link
-                  href="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: collegeButtonColor || 'var(--accent)',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    filter: collegeButtonColor ? 'brightness(1.8) saturate(1.1)' : 'brightness(1.3)',
-                  }}
-                >
-                  Terms of Service
-                </Link>
-                {' '}and{' '}
-                <Link
-                  href="/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: collegeButtonColor || 'var(--accent)',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    filter: collegeButtonColor ? 'brightness(1.8) saturate(1.1)' : 'brightness(1.3)',
-                  }}
-                >
-                  Privacy Policy
-                </Link>
-              </span>
-            </label>
-          </div>
+          <Input
+            label="Full Name"
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="John Doe"
+            required
+            disabled={loading}
+          />
 
-          <div style={{ paddingTop: '4px', paddingBottom: '4px' }}>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={loading}
-              style={{
-                width: '100%',
-                ...(collegeButtonColor && { backgroundColor: collegeButtonColor }),
-              }}
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </Button>
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            required
+            disabled={loading}
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            helperText="At least 8 characters"
+            required
+            disabled={loading}
+          />
+
+          <Input
+            label="Confirm Password"
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="••••••••"
+            required
+            disabled={loading}
+          />
+
+          <Button type="submit" variant="primary" size="lg" loading={loading} style={{ marginTop: 'var(--space-2)' }}>
+            Create Account
+          </Button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '14px' }}>
-          <p style={{ fontSize: '13px', color: 'var(--text)' }}>
-            Already have an account?{' '}
-            <Link
-              href="/login"
-              style={{
-                color: collegeButtonColor || 'var(--accent)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                filter: collegeButtonColor ? 'brightness(1.8) saturate(1.1)' : 'brightness(1.3)',
-              }}
-            >
-              Sign in
-            </Link>
+        <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', margin: '0 0 var(--space-2) 0', textAlign: 'center' }}>
+            Already have an account?
           </p>
+          <Link href="/login" style={{ display: 'block', color: 'var(--accent)', textDecoration: 'none', fontSize: 'var(--font-size-sm)', fontWeight: '500', textAlign: 'center' }}>
+            Sign in here
+          </Link>
         </div>
       </Card>
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './Button';
+import styles from './EmptyState.module.css';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -14,12 +15,12 @@ interface EmptyStateProps {
 
 const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, action, className = '' }) => {
   return (
-    <div className={`rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-white/2 ${className}`} style={{ padding: '20px' }}>
-      <div className="flex items-center gap-3" style={{ marginBottom: '8px' }}>
-        {icon && <div className="text-xl text-[var(--muted)]">{icon}</div>}
-        <h3 className="text-sm font-semibold text-[var(--text)]">{title}</h3>
+    <div className={`${styles.container} ${className}`}>
+      <div className={styles.header}>
+        {icon && <div className={styles.icon}>{icon}</div>}
+        <h3 className={styles.title}>{title}</h3>
       </div>
-      <p className="text-xs text-[var(--muted)]" style={{ marginBottom: '16px' }}>{description}</p>
+      <p className={styles.description}>{description}</p>
       {action && (
         <Button variant="secondary" size="md" onClick={action.onClick}>
           {action.label}

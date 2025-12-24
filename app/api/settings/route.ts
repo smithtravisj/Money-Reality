@@ -4,133 +4,195 @@ import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/auth.config';
 import { withRateLimit } from '@/lib/withRateLimit';
 
-// GET settings for authenticated user
-export const GET = withRateLimit(async function(_request: NextRequest) {
+const DEFAULT_SETTINGS = {
+  theme: 'dark',
+  currency: 'USD',
+  safeThreshold: null,
+  tightThreshold: null,
+  enableWarnings: true,
+  warningThreshold: null,
+  defaultPaymentMethod: null,
+};
+
+/**
+ * GET /api/settings
+ * Fetch user settings or default settings if not exists
+ */
+export const GET = withRateLimit(async function (_request: NextRequest) {
   try {
     const session = await getServerSession(authConfig);
 
     if (!session?.user?.id) {
-      console.log('[GET /api/settings] No user ID in session');
-      return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Please sign in to continue' },
+        { status: 401 }
+      );
     }
 
-    console.log('[GET /api/settings] Fetching for user:', session.user.id);
-
-    const settings = await prisma.settings.findUnique({
+    // Try to find existing settings
+    let settings = await prisma.settings.findUnique({
       where: { userId: session.user.id },
     });
 
-    console.log('[GET /api/settings] Found settings:', settings);
+    // If no settings exist, create default settings for this user
+    if (!settings) {
+      settings = await prisma.settings.create({
+        data: {
+          userId: session.user.id,
+          ...DEFAULT_SETTINGS,
+        },
+      });
+    }
 
-    const response = {
-      userId: session.user.id,
-      settings: settings || {
-        dueSoonWindowDays: 7,
-        weekStartsOn: 'Sun',
-        theme: 'system',
-        enableNotifications: false,
-        university: null,
-        hasCompletedOnboarding: false,
-        selectedGradeSemester: 'all',
-      },
-    };
-
-    console.log('[GET /api/settings] Returning:', response);
-    return NextResponse.json(response);
+    return NextResponse.json({ settings });
   } catch (error) {
-    console.error('[GET /api/settings] Error:', error);
+    console.error('Error fetching settings:', error);
     return NextResponse.json(
-      { error: 'We couldn\'t load your settings. Please check your connection and try again.' },
+      {
+        error: 'We couldn\'t load your settings. Please check your connection and try again.',
+      },
       { status: 500 }
     );
   }
 });
 
-// PATCH update settings
-export const PATCH = withRateLimit(async function(req: NextRequest) {
-  const session = await getServerSession(authConfig);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
-  }
-
-  const userId = session.user.id;
-  const data = await req.json();
-
+/**
+ * PATCH /api/settings
+ * Update user settings
+ * Optional fields: theme, currency, safeThreshold, tightThreshold, enableWarnings, warningThreshold, defaultPaymentMethod
+ */
+export const PATCH = withRateLimit(async function (req: NextRequest) {
   try {
+    const session = await getServerSession(authConfig);
 
-    // Build update data object dynamically
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Please sign in to continue' },
+        { status: 401 }
+      );
+    }
+
+    const data = await req.json();
+
+    // Validate and prepare update data
     const updateData: any = {};
 
-    if (data.dueSoonWindowDays !== undefined) updateData.dueSoonWindowDays = data.dueSoonWindowDays;
-    if (data.weekStartsOn !== undefined) updateData.weekStartsOn = data.weekStartsOn;
-    if (data.theme !== undefined) updateData.theme = data.theme;
-    if (data.enableNotifications !== undefined) updateData.enableNotifications = data.enableNotifications;
-    if (data.university !== undefined) updateData.university = data.university;
-    if (data.visiblePages !== undefined) updateData.visiblePages = data.visiblePages;
-    if (data.visibleDashboardCards !== undefined) updateData.visibleDashboardCards = data.visibleDashboardCards;
-    if (data.visibleToolsCards !== undefined) updateData.visibleToolsCards = data.visibleToolsCards;
-    if (data.hasCompletedOnboarding !== undefined) updateData.hasCompletedOnboarding = data.hasCompletedOnboarding;
-    if (data.examReminders !== undefined) updateData.examReminders = data.examReminders;
-    if (data.pomodoroWorkDuration !== undefined) updateData.pomodoroWorkDuration = data.pomodoroWorkDuration;
-    if (data.pomodoroBreakDuration !== undefined) updateData.pomodoroBreakDuration = data.pomodoroBreakDuration;
-    if (data.pomodoroIsMuted !== undefined) updateData.pomodoroIsMuted = data.pomodoroIsMuted;
-    if (data.selectedGradeSemester !== undefined) updateData.selectedGradeSemester = data.selectedGradeSemester;
-    if (data.toolsCardsOrder !== undefined) updateData.toolsCardsOrder = data.toolsCardsOrder;
-    if (data.visiblePagesOrder !== undefined) updateData.visiblePagesOrder = data.visiblePagesOrder;
-    if (data.dashboardCardsCollapsedState !== undefined) updateData.dashboardCardsCollapsedState = data.dashboardCardsCollapsedState;
-
-    console.log('[PATCH /api/settings] Updating with data:', updateData);
-
-    // Try to update existing settings
-    let settings = await prisma.settings.update({
-      where: { userId },
-      data: updateData,
-    });
-
-    console.log('[PATCH /api/settings] Updated settings:', settings);
-    return NextResponse.json({ settings });
-  } catch (error) {
-    console.error('[PATCH /api/settings] Error:', error);
-
-    // Check if this is a record not found error (P2025)
-    const isNotFoundError = (error: any) => {
-      return error?.code === 'P2025' || error?.message?.includes('not found');
-    };
-
-    // If settings don't exist, try to create them
-    if (isNotFoundError(error)) {
-      try {
-        console.log('[PATCH /api/settings] Settings not found, creating new ones...');
-
-        const crypto = require('crypto');
-        const newId = crypto.randomUUID();
-
-        const newSettings = await prisma.settings.create({
-          data: {
-            id: newId,
-            userId: userId,
-            dueSoonWindowDays: 7,
-            weekStartsOn: 'Sun',
-            theme: 'dark',
-            enableNotifications: false,
-            ...data,
-          },
-        });
-
-        console.log('[PATCH /api/settings] Created new settings:', newSettings);
-        return NextResponse.json({ settings: newSettings });
-      } catch (createError) {
-        console.error('[PATCH /api/settings] Failed to create settings:', createError);
+    if (data.theme !== undefined) {
+      // Only support dark theme for now
+      if (data.theme !== 'dark') {
         return NextResponse.json(
-          { error: 'Failed to create settings', details: createError instanceof Error ? createError.message : String(createError) },
-          { status: 500 }
+          { error: 'Theme must be "dark"' },
+          { status: 400 }
         );
+      }
+      updateData.theme = data.theme;
+    }
+
+    if (data.currency !== undefined) {
+      const validCurrencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR'];
+      if (!validCurrencies.includes(data.currency)) {
+        return NextResponse.json(
+          { error: `Currency must be one of: ${validCurrencies.join(', ')}` },
+          { status: 400 }
+        );
+      }
+      updateData.currency = data.currency;
+    }
+
+    if (data.safeThreshold !== undefined) {
+      if (data.safeThreshold !== null) {
+        const safeThreshold = parseFloat(data.safeThreshold);
+        if (isNaN(safeThreshold) || safeThreshold <= 0) {
+          return NextResponse.json(
+            { error: 'safeThreshold must be a positive number or null' },
+            { status: 400 }
+          );
+        }
+        updateData.safeThreshold = safeThreshold;
+      } else {
+        updateData.safeThreshold = null;
       }
     }
 
+    if (data.tightThreshold !== undefined) {
+      if (data.tightThreshold !== null) {
+        const tightThreshold = parseFloat(data.tightThreshold);
+        if (isNaN(tightThreshold) || tightThreshold <= 0) {
+          return NextResponse.json(
+            { error: 'tightThreshold must be a positive number or null' },
+            { status: 400 }
+          );
+        }
+        updateData.tightThreshold = tightThreshold;
+      } else {
+        updateData.tightThreshold = null;
+      }
+    }
+
+    if (data.warningThreshold !== undefined) {
+      if (data.warningThreshold !== null) {
+        const warningThreshold = parseFloat(data.warningThreshold);
+        if (isNaN(warningThreshold)) {
+          return NextResponse.json(
+            { error: 'warningThreshold must be a number or null' },
+            { status: 400 }
+          );
+        }
+        updateData.warningThreshold = warningThreshold;
+      } else {
+        updateData.warningThreshold = null;
+      }
+    }
+
+    if (data.enableWarnings !== undefined) {
+      if (typeof data.enableWarnings !== 'boolean') {
+        return NextResponse.json(
+          { error: 'enableWarnings must be a boolean' },
+          { status: 400 }
+        );
+      }
+      updateData.enableWarnings = data.enableWarnings;
+    }
+
+    if (data.defaultPaymentMethod !== undefined) {
+      if (data.defaultPaymentMethod !== null) {
+        const validMethods = ['Cash', 'Card', 'Transfer', 'Other'];
+        if (!validMethods.includes(data.defaultPaymentMethod)) {
+          return NextResponse.json(
+            { error: `defaultPaymentMethod must be one of: ${validMethods.join(', ')} or null` },
+            { status: 400 }
+          );
+        }
+      }
+      updateData.defaultPaymentMethod = data.defaultPaymentMethod;
+    }
+
+    // Ensure settings exist for this user before updating
+    let settings = await prisma.settings.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!settings) {
+      settings = await prisma.settings.create({
+        data: {
+          userId: session.user.id,
+          ...DEFAULT_SETTINGS,
+          ...updateData,
+        },
+      });
+    } else {
+      settings = await prisma.settings.update({
+        where: { userId: session.user.id },
+        data: updateData,
+      });
+    }
+
+    return NextResponse.json({ settings });
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to update settings', details: error instanceof Error ? error.message : String(error) },
+      { error: 'Failed to update settings', details: errorMessage },
       { status: 500 }
     );
   }

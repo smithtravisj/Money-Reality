@@ -1,220 +1,186 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { CheckCircle } from 'lucide-react';
+import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
 
-function ResetPasswordContent() {
+export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [newPassword, setNewPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [validToken, setValidToken] = useState(false);
 
-  // Validate password format
-  const passwordErrors: string[] = [];
-  if (newPassword && newPassword.length < 8) {
-    passwordErrors.push('At least 8 characters');
-  }
-  if (confirmPassword && newPassword !== confirmPassword) {
-    passwordErrors.push('Passwords must match');
-  }
+  useEffect(() => {
+    if (!token) {
+      setError('Invalid reset link. Please request a new password reset.');
+    } else {
+      setValidToken(true);
+    }
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validate passwords
-    if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (!password || !confirmPassword) {
+      setError('Please fill in all fields');
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (password !== confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-
-    if (!token) {
-      setError('No reset token found');
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const response = await fetch('/api/user/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({
+          token,
+          password,
+        }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong');
-        setLoading(false);
+      if (!response.ok) {
+        setError(data.message || 'Failed to reset password');
         return;
       }
 
-      setSuccess(true);
-      // Redirect to login after 2 seconds
+      setMessage('Password reset successfully! Redirecting to login...');
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      setError('An error occurred. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
-  if (!token) {
+  if (!validToken) {
     return (
-      <div>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
-            College Survival Tool
-          </h1>
-        </div>
-
-        <Card>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 'var(--space-3)' }}>
+        <Card style={{ width: '100%', maxWidth: '450px' }}>
+          <div style={{ marginBottom: 'var(--space-4)' }}>
+            <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--text)', margin: '0 0 var(--space-1) 0' }}>
               Invalid Reset Link
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>
-              The reset link is missing or invalid. Please request a new one.
-            </p>
+            </h1>
           </div>
 
-          <div style={{ marginTop: '24px' }}>
-            <Link href="/forgot-password" style={{ display: 'block', textAlign: 'center', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600, filter: 'brightness(1.6)' }}>
-              Request New Reset Link
-            </Link>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
-            College Survival Tool
-          </h1>
-        </div>
-
-        <Card>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-              <CheckCircle size={48} color="var(--text-muted)" strokeWidth={1.5} />
-            </div>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
-              Password Reset Successful!
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>
-              Your password has been changed. Redirecting to login...
-            </p>
+          <div
+            style={{
+              padding: 'var(--space-3)',
+              backgroundColor: 'var(--status-danger-bg)',
+              color: 'var(--status-danger)',
+              borderRadius: 'var(--radius-control)',
+              fontSize: 'var(--font-size-sm)',
+              marginBottom: 'var(--space-4)',
+            }}
+          >
+            {error}
           </div>
 
-          <div style={{ marginTop: '24px' }}>
-            <Link href="/login" style={{ display: 'block', textAlign: 'center', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600, filter: 'brightness(1.6)' }}>
-              Go to Login
-            </Link>
-          </div>
+          <Link href="/forgot-password" style={{ display: 'block', color: 'var(--accent)', textDecoration: 'none', fontSize: 'var(--font-size-sm)', fontWeight: '500', textAlign: 'center' }}>
+            Request a new reset link
+          </Link>
         </Card>
       </div>
     );
   }
 
   return (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 600, color: 'var(--text)', marginBottom: '12px' }}>
-          College Survival Tool
-        </h1>
-        <p style={{ color: 'var(--text)', marginBottom: '8px', fontSize: '18px' }}>Create a new password</p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 'var(--space-3)' }}>
+      <Card style={{ width: '100%', maxWidth: '450px' }}>
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--text)', margin: '0 0 var(--space-1) 0' }}>
+            Create New Password
+          </h1>
+          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', margin: '0' }}>
+            Enter your new password below
+          </p>
+        </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           {error && (
-            <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '8px', padding: '12px' }}>
-              <p style={{ fontSize: '14px', color: 'rgb(239, 68, 68)' }}>{error}</p>
+            <div
+              style={{
+                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: 'var(--status-danger-bg)',
+                color: 'var(--status-danger)',
+                borderRadius: 'var(--radius-control)',
+                fontSize: 'var(--font-size-sm)',
+              }}
+            >
+              {error}
             </div>
           )}
 
-          <div>
-            <label style={{ display: 'block', fontSize: '15px', fontWeight: 500, color: 'var(--text)', marginBottom: '6px' }}>
-              New Password
-            </label>
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
-            {passwordErrors.length > 0 && newPassword && (
-              <div style={{ marginTop: '6px', fontSize: '13px', color: 'rgb(239, 68, 68)' }}>
-                {passwordErrors.map((err, i) => (
-                  <div key={i}>• {err}</div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '15px', fontWeight: 500, color: 'var(--text)', marginBottom: '6px' }}>
-              Confirm Password
-            </label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={loading || passwordErrors.length > 0}
-              style={{ width: '100%' }}
+          {message && (
+            <div
+              style={{
+                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: 'var(--status-safe-bg)',
+                color: 'var(--status-safe)',
+                borderRadius: 'var(--radius-control)',
+                fontSize: 'var(--font-size-sm)',
+              }}
             >
-              {loading ? 'Resetting...' : 'Reset Password'}
-            </Button>
-          </div>
+              {message}
+            </div>
+          )}
+
+          <Input
+            label="New Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            helperText="At least 8 characters"
+            required
+            disabled={loading || !!message}
+          />
+
+          <Input
+            label="Confirm Password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            disabled={loading || !!message}
+          />
+
+          <Button type="submit" variant="primary" size="lg" loading={loading} disabled={!!message} style={{ marginTop: 'var(--space-2)' }}>
+            Reset Password
+          </Button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <Link href="/login" style={{ fontSize: '14px', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600, filter: 'brightness(1.6)' }}>
-            Back to sign in
+        <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border)' }}>
+          <Link href="/login" style={{ display: 'block', color: 'var(--text-muted)', textDecoration: 'none', fontSize: 'var(--font-size-xs)', textAlign: 'center' }}>
+            Back to Sign In
           </Link>
         </div>
       </Card>
     </div>
-  );
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ResetPasswordContent />
-    </Suspense>
   );
 }

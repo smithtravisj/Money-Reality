@@ -1,0 +1,49 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* Variants */
+.variant-success {
+  background-color: rgba(87, 171, 90, 0.15);
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.variant-warning {
+  background-color: rgba(198, 144, 38, 0.15);
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.variant-danger {
+  background-color: rgba(229, 83, 75, 0.15);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.variant-neutral {
+  background-color: var(--panel-2);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+.variant-info {
+  background-color: rgba(37, 99, 235, 0.15);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .badge {
+    font-size: var(--font-size-xs);
+    padding: 3px 6px;
+  }
+}

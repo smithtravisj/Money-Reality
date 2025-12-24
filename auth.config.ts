@@ -36,21 +36,6 @@ export const authConfig: NextAuthOptions = {
             return null;
           }
 
-          // Log login event to analytics
-          try {
-            await prisma.analyticsEvent.create({
-              data: {
-                sessionId: 'server-login',
-                userId: user.id,
-                eventType: 'login',
-                eventName: 'user_login',
-              },
-            });
-          } catch (analyticsError) {
-            console.error('Failed to log login event:', analyticsError);
-            // Don't fail login if analytics fails
-          }
-
           return {
             id: user.id,
             email: user.email,
@@ -66,12 +51,9 @@ export const authConfig: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log('JWT callback - creating token for user:', user.id);
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-      } else {
-        console.log('JWT callback - no user, token:', token ? 'exists' : 'null');
       }
       return token;
     },
@@ -87,7 +69,7 @@ export const authConfig: NextAuthOptions = {
         try {
           const freshUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { name: true, email: true, isAdmin: true },
+            select: { name: true, email: true },
           });
 
           if (freshUser) {
@@ -95,7 +77,6 @@ export const authConfig: NextAuthOptions = {
             session.user.email = freshUser.email;
             token.name = freshUser.name;
             token.email = freshUser.email;
-            (session.user as any).isAdmin = freshUser.isAdmin;
           }
         } catch (error) {
           console.error('Error fetching fresh user data in session:', error);

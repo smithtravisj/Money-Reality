@@ -8,401 +8,118 @@ datasource db {
 }
 
 model User {
-  id                        String                     @id @default(cuid())
-  email                     String                     @unique
-  passwordHash              String
-  name                      String?
-  resetPasswordToken        String?                    @unique
-  resetPasswordTokenExpiry  DateTime?
-  createdAt                 DateTime                   @default(now())
-  updatedAt                 DateTime                   @updatedAt
-  isAdmin                   Boolean                    @default(false)
-  collegeRequests           CollegeRequest[]
-  courses                   Course[]
-  deadlines                 Deadline[]
-  exams                     Exam[]
-  excludedDates             ExcludedDate[]
-  featureRequests           FeatureRequest[]
-  folders                   Folder[]
-  gpaEntries                GpaEntry[]
-  issueReports              IssueReport[]
-  notes                     Note[]
-  notifications             Notification[]
-  rateLimits                RateLimit[]
-  recurringDeadlinePatterns RecurringDeadlinePattern[]
-  recurringExamPatterns     RecurringExamPattern[]
-  recurringPatterns         RecurringPattern[]
-  settings                  Settings?
-  tasks                     Task[]
+  id                       String             @id @default(cuid())
+  email                    String             @unique
+  passwordHash             String
+  name                     String?
+  resetPasswordToken       String?            @unique
+  resetPasswordTokenExpiry DateTime?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+
+  transactions             Transaction[]
+  categories               Category[]
+  weeklyCheckins           WeeklyCheckin[]
+  balanceSnapshots         BalanceSnapshot[]
+  settings                 Settings?
+  rateLimits               RateLimit[]
 
   @@index([email])
 }
 
-model Course {
-  id            String         @id @default(cuid())
+model Transaction {
+  id            String    @id @default(cuid())
   userId        String
-  code          String
-  name          String
-  term          String
-  meetingTimes  Json           @default("[]")
-  links         Json           @default("[]")
-  colorTag      String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  startDate     DateTime?
-  endDate       DateTime?
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deadlines     Deadline[]
-  exams         Exam[]
-  excludedDates ExcludedDate[]
-  folders       Folder[]
-  gpaEntries    GpaEntry[]
-  notes         Note[]
-  tasks         Task[]
+  type          String    // 'expense' or 'income'
+  amount        Float     // Stored as positive number, type indicates direction
+  date          DateTime  // Full date/time of transaction
+  categoryId    String?   // Optional category
+  merchant      String?   // Where money was spent/received
+  paymentMethod String?   // Cash, Card, Transfer, etc.
+  notes         String    @default("")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([type])
+  @@index([date])
+  @@index([categoryId])
 }
 
-model Deadline {
-  id                 String                    @id @default(cuid())
-  userId             String
-  title              String
-  courseId           String?
-  dueAt              DateTime?
-  notes              String                    @default("")
-  status             String                    @default("open")
-  createdAt          DateTime                  @default(now())
-  updatedAt          DateTime                  @updatedAt
-  links              Json                      @default("[]")
-  instanceDate       DateTime?
-  isRecurring        Boolean                   @default(false)
-  recurringPatternId String?
-  course             Course?                   @relation(fields: [courseId], references: [id])
-  recurringPattern   RecurringDeadlinePattern? @relation(fields: [recurringPatternId], references: [id])
-  user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Category {
+  id           String        @id @default(cuid())
+  userId       String
+  name         String        // "Groceries", "Rent", etc.
+  type         String        // 'expense' or 'income'
+  parentGroup  String?       // "Essentials", "Lifestyle", "Health", "Personal"
+  colorTag     String?       // Hex color for UI (e.g. #57ab5a)
+  icon         String?       // Icon identifier (lucide icon name)
+  order        Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, name, type])
   @@index([userId])
-  @@index([courseId])
-  @@index([status])
-  @@index([recurringPatternId])
-  @@index([isRecurring])
+  @@index([type])
+  @@index([parentGroup])
 }
 
-model Task {
-  id                 String            @id @default(cuid())
-  userId             String
-  title              String
-  courseId           String?
-  dueAt              DateTime?
-  pinned             Boolean           @default(false)
-  checklist          Json              @default("[]")
-  notes              String            @default("")
-  status             String            @default("open")
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  links              Json              @default("[]")
-  instanceDate       DateTime?
-  isRecurring        Boolean           @default(false)
-  recurringPatternId String?
-  course             Course?           @relation(fields: [courseId], references: [id])
-  recurringPattern   RecurringPattern? @relation(fields: [recurringPatternId], references: [id])
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+model WeeklyCheckin {
+  id                String   @id @default(cuid())
+  userId            String
+  weekStartDate     DateTime // Monday of the week
+  weekEndDate       DateTime // Sunday of the week
+  totalIncome       Float    @default(0) // Income for the week
+  totalExpenses     Float    @default(0) // Expenses for the week
+  netChange         Float    @default(0) // Income - Expenses
+  startingBalance   Float    @default(0) // Balance at start of week
+  endingBalance     Float    @default(0) // Balance at end of week
+  reflectionNotes   String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStartDate])
   @@index([userId])
-  @@index([courseId])
-  @@index([status])
-  @@index([pinned])
-  @@index([recurringPatternId])
-  @@index([isRecurring])
+  @@index([weekStartDate])
 }
 
-model RecurringPattern {
-  id              String    @id @default(cuid())
-  userId          String
-  recurrenceType  String
-  intervalDays    Int?
-  endDate         DateTime?
-  occurrenceCount Int?
-  lastGenerated   DateTime  @default(now())
-  instanceCount   Int       @default(0)
-  taskTemplate    Json
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  isActive        Boolean   @default(true)
-  daysOfWeek      Json      @default("[]")
-  daysOfMonth     Json      @default("[]")
-  startDate       DateTime?
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks           Task[]
-
-  @@index([userId])
-  @@index([isActive])
-}
-
-model RecurringDeadlinePattern {
-  id               String     @id @default(cuid())
-  userId           String
-  recurrenceType   String
-  intervalDays     Int?
-  daysOfWeek       Json       @default("[]")
-  daysOfMonth      Json       @default("[]")
-  startDate        DateTime?
-  endDate          DateTime?
-  occurrenceCount  Int?
-  lastGenerated    DateTime   @default(now())
-  instanceCount    Int        @default(0)
-  deadlineTemplate Json
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  isActive         Boolean    @default(true)
-  deadlines        Deadline[]
-  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([isActive])
-}
-
-model RecurringExamPattern {
-  id              String    @id @default(cuid())
-  userId          String
-  recurrenceType  String
-  intervalDays    Int?
-  daysOfWeek      Json      @default("[]")
-  daysOfMonth     Json      @default("[]")
-  startDate       DateTime?
-  endDate         DateTime?
-  occurrenceCount Int?
-  lastGenerated   DateTime  @default(now())
-  instanceCount   Int       @default(0)
-  examTemplate    Json
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  isActive        Boolean   @default(true)
-  exams           Exam[]
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([isActive])
-}
-
-model Exam {
-  id                 String                @id @default(cuid())
-  userId             String
-  title              String
-  courseId           String?
-  examAt             DateTime?
-  location           String?
-  notes              String                @default("")
-  status             String                @default("scheduled")
-  links              Json                  @default("[]")
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @updatedAt
-  instanceDate       DateTime?
-  isRecurring        Boolean               @default(false)
-  recurringPatternId String?
-  course             Course?               @relation(fields: [courseId], references: [id])
-  recurringPattern   RecurringExamPattern? @relation(fields: [recurringPatternId], references: [id])
-  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reminders          ExamReminder[]
-  notifications      Notification[]
-
-  @@index([userId])
-  @@index([courseId])
-  @@index([status])
-  @@index([examAt])
-  @@index([recurringPatternId])
-  @@index([isRecurring])
-}
-
-model ExamReminder {
-  id             String   @id @default(cuid())
-  examId         String
-  reminderType   String
-  sentAt         DateTime @default(now())
-  notificationId String?
-  exam           Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
-
-  @@unique([examId, reminderType])
-  @@index([examId])
-  @@index([sentAt])
-}
-
-model Note {
+model BalanceSnapshot {
   id        String   @id @default(cuid())
   userId    String
-  title     String
-  content   Json     @default("{}")
-  plainText String   @default("")
-  folderId  String?
-  courseId  String?
-  tags      Json     @default("[]")
-  isPinned  Boolean  @default(false)
-  links     Json     @default("[]")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  course    Course?  @relation(fields: [courseId], references: [id])
-  folder    Folder?  @relation(fields: [folderId], references: [id])
+  balance   Float    // Current balance at this point
+  status    String   // 'safe', 'tight', or 'danger'
+  timestamp DateTime @default(now())
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([folderId])
-  @@index([courseId])
-  @@index([isPinned])
-}
-
-model Folder {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  parentId  String?
-  courseId  String?
-  colorTag  String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  course    Course?  @relation(fields: [courseId], references: [id])
-  parent    Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Folder[] @relation("FolderHierarchy")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes     Note[]
-
-  @@unique([userId, name, parentId])
-  @@index([userId])
-  @@index([parentId])
-  @@index([courseId])
-}
-
-model GpaEntry {
-  id         String   @id @default(cuid())
-  userId     String
-  courseId   String?
-  courseName String
-  grade      String
-  credits    Float
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  university String?
-  status     String   @default("final")
-  term       String   @default("")
-  course     Course?  @relation(fields: [courseId], references: [id])
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([university])
-  @@index([term])
-  @@index([status])
+  @@index([timestamp])
 }
 
 model Settings {
-  id                     String   @id @default(cuid())
-  userId                 String   @unique
-  dueSoonWindowDays      Int      @default(7)
-  weekStartsOn           String   @default("Sun")
-  theme                  String   @default("dark")
-  enableNotifications    Boolean  @default(false)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-  university             String?
-  visibleDashboardCards  Json?    @default("[\"nextClass\", \"dueSoon\", \"overview\", \"todayTasks\", \"quickLinks\", \"upcomingWeek\"]")
-  visiblePages           Json?    @default("[\"Dashboard\", \"Calendar\", \"Tasks\", \"Deadlines\", \"Exams\", \"Courses\", \"Tools\", \"Settings\"]")
-  visibleToolsCards      Json?    @default("[\"quickLinks\", \"gpaCalculator\"]")
-  hasCompletedOnboarding Boolean  @default(false)
-  examReminders          Json?    @default("[{\"unit\": \"days\", \"value\": 7, \"enabled\": true}, {\"unit\": \"days\", \"value\": 1, \"enabled\": true}, {\"unit\": \"hours\", \"value\": 3, \"enabled\": true}]")
-  pomodoroBreakDuration  Int      @default(5)
-  pomodoroIsMuted        Boolean  @default(false)
-  pomodoroWorkDuration   Int      @default(25)
-  selectedGradeSemester  String   @default("all")
-  toolsCardsOrder        Json?    @default("[\"pomodoroTimer\", \"gradeTracker\", \"gpaTrendChart\", \"whatIfProjector\", \"gpaCalculator\", \"tools_quickLinks\"]")
-  visiblePagesOrder      Json?    @default("[\"Dashboard\", \"Calendar\", \"Tasks\", \"Deadlines\", \"Exams\", \"Notes\", \"Courses\", \"Tools\"]")
-  dashboardCardsCollapsedState Json? @default("[]")
-  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  theme                 String   @default("dark")
+  currency              String   @default("USD")
+  safeThreshold         Float?   // Optional: balance above = safe (default 1000)
+  tightThreshold        Float?   // Optional: balance above = tight, below = danger (default 200)
+  enableWarnings        Boolean  @default(true)
+  warningThreshold      Float?   // Optional: show warnings when balance below this
+  defaultPaymentMethod  String?  // Default payment method (Cash, Card, Transfer, etc.)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-}
-
-model CollegeRequest {
-  id            String         @id @default(cuid())
-  userId        String
-  collegeName   String
-  status        String         @default("pending")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notifications Notification[]
-
-  @@index([userId])
-  @@index([status])
-}
-
-model IssueReport {
-  id            String         @id @default(cuid())
-  userId        String
-  description   String
-  status        String         @default("pending")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notifications Notification[]
-
-  @@index([userId])
-  @@index([status])
-}
-
-model FeatureRequest {
-  id            String         @id @default(cuid())
-  userId        String
-  description   String
-  status        String         @default("pending")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notifications Notification[]
-
-  @@index([userId])
-  @@index([status])
-}
-
-model ExcludedDate {
-  id          String   @id @default(cuid())
-  userId      String
-  courseId    String?
-  date        DateTime
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  course      Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([courseId])
-  @@index([date])
-}
-
-model Notification {
-  id               String          @id @default(cuid())
-  userId           String
-  title            String
-  message          String
-  type             String
-  read             Boolean         @default(false)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  collegeRequestId String?
-  featureRequestId String?
-  issueReportId    String?
-  examId           String?
-  collegeRequest   CollegeRequest? @relation(fields: [collegeRequestId], references: [id], onDelete: Cascade)
-  exam             Exam?           @relation(fields: [examId], references: [id], onDelete: Cascade)
-  featureRequest   FeatureRequest? @relation(fields: [featureRequestId], references: [id], onDelete: Cascade)
-  issueReport      IssueReport?    @relation(fields: [issueReportId], references: [id], onDelete: Cascade)
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([read])
-  @@index([collegeRequestId])
-  @@index([issueReportId])
-  @@index([featureRequestId])
-  @@index([examId])
 }
 
 model RateLimit {
@@ -412,24 +129,10 @@ model RateLimit {
   count     Int      @default(0)
   resetAt   DateTime
   createdAt DateTime @default(now())
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, endpoint])
   @@index([userId])
   @@index([resetAt])
-}
-
-model AnalyticsEvent {
-  id        String   @id @default(cuid())
-  sessionId String
-  userId    String?
-  eventType String
-  eventName String
-  metadata  Json?
-  createdAt DateTime @default(now())
-
-  @@index([sessionId])
-  @@index([userId])
-  @@index([eventType])
-  @@index([createdAt])
 }

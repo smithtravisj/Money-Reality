@@ -1,45 +1,48 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 
-/**
- * Hook to detect viewport width using matchMedia API
- * @param query - Media query string (e.g., '(max-width: 767px)')
- * @returns boolean - true if media query matches
- */
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+const DEFAULT_BREAKPOINT = 768;
+
+export function useIsMobile(breakpoint: number = DEFAULT_BREAKPOINT): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasWindowObject, setHasWindowObject] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia(query);
+    setHasWindowObject(true);
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
 
-    // Set initial value
-    setMatches(media.matches);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
 
-    // Listen for changes
-    const listener = (e: MediaQueryListEvent) => {
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, [breakpoint]);
+
+  return hasWindowObject ? isMobile : false;
+}
+
+export function useIsDesktop(breakpoint: number = DEFAULT_BREAKPOINT): boolean {
+  const isMobile = useIsMobile(breakpoint);
+  return !isMobile;
+}
+
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+  const [hasWindowObject, setHasWindowObject] = useState(false);
+
+  useEffect(() => {
+    setHasWindowObject(true);
+    const mediaQueryList = window.matchMedia(query);
+
+    const handleChange = (e: MediaQueryListEvent) => {
       setMatches(e.matches);
     };
 
-    media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
+    mediaQueryList.addEventListener('change', handleChange);
+    setMatches(mediaQueryList.matches);
+
+    return () => mediaQueryList.removeEventListener('change', handleChange);
   }, [query]);
 
-  return matches;
-}
-
-/**
- * Convenience hook for detecting mobile viewport
- * @returns boolean - true if viewport width is <= 767px (mobile)
- */
-export function useIsMobile(): boolean {
-  return useMediaQuery('(max-width: 767px)');
-}
-
-/**
- * Convenience hook for detecting desktop viewport
- * @returns boolean - true if viewport width is >= 768px (desktop)
- */
-export function useIsDesktop(): boolean {
-  return useMediaQuery('(min-width: 768px)');
+  return hasWindowObject ? matches : false;
 }

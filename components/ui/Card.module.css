@@ -1,26 +1,94 @@
+.card {
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--card-border-radius);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  width: 100%;
+  height: 100%;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+}
+
+.card.hoverable {
+  cursor: pointer;
+}
+
+.card.hoverable:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--text);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-base);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Mobile overrides */
 @media (max-width: 767px) {
-  /* Override the hardcoded padding on mobile cards */
-  .mobileCard {
-    padding: 10px !important;
+  .card {
+    padding: 16px;
+    border-radius: 10px;
   }
 
-  /* Reduce spacing between header and content */
-  .mobileHeader {
-    margin-bottom: 8px !important;
+  .header {
+    padding-bottom: var(--space-2);
+    gap: var(--space-2);
   }
 
-  /* Reduce spacing between children */
-  .mobileContent {
-    gap: 12px !important;
+  .title {
+    font-size: var(--font-size-md);
   }
 
-  /* Reduce title size */
-  .mobileTitle {
-    font-size: var(--font-size-lg);
+  .subtitle {
+    font-size: var(--font-size-xs);
   }
 
-  /* Reduce subtitle/text sizes */
-  .mobileSubtitle {
-    font-size: var(--font-size-sm);
+  .content {
+    gap: var(--space-2);
   }
 }

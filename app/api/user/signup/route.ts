@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { DEFAULT_VISIBLE_PAGES, DEFAULT_VISIBLE_DASHBOARD_CARDS, DEFAULT_VISIBLE_TOOLS_CARDS } from '@/lib/customizationConstants';
 import { withRateLimit } from '@/lib/withRateLimit';
+import { seedCategories } from '@/lib/seedCategories';
 
-export const POST = withRateLimit(async function(req: NextRequest) {
+export const POST = withRateLimit(async function (req: NextRequest) {
   try {
-    const { name, email, password, university } = await req.json();
+    const { name, email, password } = await req.json();
 
     // Validation
     if (!email || !password) {
@@ -19,6 +19,15 @@ export const POST = withRateLimit(async function(req: NextRequest) {
     if (password.length < 8) {
       return NextResponse.json(
         { error: 'Password must be at least 8 characters' },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Please enter a valid email address' },
         { status: 400 }
       );
     }
@@ -38,7 +47,7 @@ export const POST = withRateLimit(async function(req: NextRequest) {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with default settings
     const user = await prisma.user.create({
       data: {
         email,
@@ -46,18 +55,20 @@ export const POST = withRateLimit(async function(req: NextRequest) {
         passwordHash,
         settings: {
           create: {
-            dueSoonWindowDays: 7,
-            weekStartsOn: 'Sun',
-            theme: 'system',
-            enableNotifications: false,
-            university: university || null,
-            visiblePages: DEFAULT_VISIBLE_PAGES,
-            visibleDashboardCards: DEFAULT_VISIBLE_DASHBOARD_CARDS,
-            visibleToolsCards: DEFAULT_VISIBLE_TOOLS_CARDS,
+            theme: 'dark',
+            currency: 'USD',
+            safeThreshold: null,
+            tightThreshold: null,
+            enableWarnings: true,
+            warningThreshold: null,
+            defaultPaymentMethod: null,
           },
         },
       },
     });
+
+    // Seed default categories for new user
+    await seedCategories(user.id);
 
     return NextResponse.json(
       {
