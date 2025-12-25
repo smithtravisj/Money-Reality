@@ -405,39 +405,34 @@ export default function GiftCardsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)' }}>
             {giftCards.map((card) => (
               <Card key={card.id}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', height: '100%' }}>
                   <div>
-                    <div style={{ fontWeight: '600', color: 'var(--text)', marginBottom: 'var(--space-2)' }}>
+                    <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-sm)', marginBottom: '2px' }}>
                       {card.name}
                     </div>
-                    <div style={{ display: 'flex', gap: 'var(--space-4)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>
+                    <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                       <span>{card.type === 'digital' ? 'Digital' : 'Physical'}</span>
                       {card.expirationDate && (
                         <span>
-                          Expires: {new Date(card.expirationDate).toLocaleDateString()}
+                          {new Date(card.expirationDate).toLocaleDateString()}
                         </span>
                       )}
                     </div>
-                    {card.notes && (
-                      <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                        {card.notes}
-                      </div>
-                    )}
                   </div>
 
-                  <div style={{ marginTop: 'auto' }}>
-                    <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                  <div style={{ marginTop: 'auto', paddingTop: 'var(--space-2)' }}>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '2px' }}>
                       Balance
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: 'var(--text)' }}>
+                    <div style={{ fontSize: 'var(--font-size-md)', fontWeight: '600', color: 'var(--text)', marginBottom: '2px' }}>
                       ${formatCurrency(card.currentBalance)}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 'var(--space-3)' }}>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                       of ${formatCurrency(card.initialBalance)}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 'var(--space-2)', justifyContent: 'flex-start' }}>
+                  <div style={{ display: 'flex', gap: 'var(--space-2)', justifyContent: 'flex-start', marginTop: 'auto', paddingTop: 'var(--space-2)' }}>
                     <button
                       onClick={() => handleEdit(card)}
                       style={{
