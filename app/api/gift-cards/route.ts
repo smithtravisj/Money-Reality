@@ -10,11 +10,17 @@ import { withRateLimit } from '@/lib/withRateLimit';
  */
 export const GET = withRateLimit(async function (_request: NextRequest) {
   try {
+    console.log('[GET /api/gift-cards] Starting...');
+
     const session = await getServerSession(authConfig);
-    console.log('[GET /api/gift-cards] Session check:', { hasSession: !!session, userId: session?.user?.id });
+    console.log('[GET /api/gift-cards] Session check:', {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      sessionKeys: session ? Object.keys(session) : null
+    });
 
     if (!session?.user?.id) {
-      console.log('[GET /api/gift-cards] No authenticated user');
+      console.log('[GET /api/gift-cards] No authenticated user, returning 401');
       return NextResponse.json(
         { error: 'Please sign in to continue' },
         { status: 401 }
@@ -30,9 +36,11 @@ export const GET = withRateLimit(async function (_request: NextRequest) {
     console.log(`[GET /api/gift-cards] Found ${giftCards.length} gift cards`);
     return NextResponse.json({ giftCards });
   } catch (error) {
-    console.error('[GET /api/gift-cards] Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[GET /api/gift-cards] Error message:', errorMessage);
+    console.error('[GET /api/gift-cards] Caught error:', error);
+    console.error('[GET /api/gift-cards] Error type:', error instanceof Error ? 'Error' : typeof error);
+    console.error('[GET /api/gift-cards] Error stack:', error instanceof Error ? error.stack : 'N/A');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[GET /api/gift-cards] Returning 500 with message:', errorMessage);
     return NextResponse.json(
       { error: 'Failed to fetch gift cards', details: errorMessage },
       { status: 500 }

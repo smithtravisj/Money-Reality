@@ -50,13 +50,15 @@ export default function GiftCardsPage() {
       const data = await response.json();
 
       console.log('[loadGiftCards] Response status:', response.status);
-      console.log('[loadGiftCards] Response data:', data);
+      console.log('[loadGiftCards] Response data:', JSON.stringify(data, null, 2));
 
       if (!response.ok) {
-        const errorMsg = data.error || data.message || 'Failed to load gift cards';
-        console.error('Gift cards API error:', { status: response.status, data });
-        setPageError(errorMsg);
-        throw new Error(errorMsg);
+        const errorMsg = data?.error || data?.message || `Server error (${response.status})`;
+        const details = data?.details || '';
+        const fullMsg = details ? `${errorMsg}: ${details}` : errorMsg;
+        console.error('Gift cards API error:', { status: response.status, data, fullMsg });
+        setPageError(fullMsg);
+        throw new Error(fullMsg);
       }
 
       setGiftCards(data.giftCards || []);
