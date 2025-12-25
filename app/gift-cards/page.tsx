@@ -432,7 +432,7 @@ export default function GiftCardsPage() {
                       <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-md)' }}>
                         {card.name}
                       </div>
-                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
                         <span>{card.type === 'digital' ? 'Digital' : 'Physical'}</span>
                         {card.expirationDate && (
                           <span>
