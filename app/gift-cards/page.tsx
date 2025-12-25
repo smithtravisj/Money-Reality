@@ -440,7 +440,7 @@ export default function GiftCardsPage() {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: 'var(--accent)',
+                        color: 'var(--text-muted)',
                         cursor: 'pointer',
                         padding: '4px',
                         display: 'flex',
