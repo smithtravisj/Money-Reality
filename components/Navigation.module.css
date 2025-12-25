@@ -175,6 +175,12 @@
   display: none;
 }
 
+.mobileDrawerTitle {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-2);
+}
+
 .mobileDrawer {
   position: fixed;
   top: 0;

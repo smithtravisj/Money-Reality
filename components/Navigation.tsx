@@ -56,6 +56,11 @@ export default function Navigation() {
         {isDrawerOpen && (
           <div className={styles.mobileDrawerOverlay} onClick={closeDrawer}>
             <nav className={styles.mobileDrawer} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.mobileDrawerTitle}>
+                <h2 style={{ margin: 0, color: 'var(--text)', fontSize: 'var(--font-size-3xl)', fontWeight: '600' }}>
+                  Money Reality
+                </h2>
+              </div>
               <div className={styles.navList}>
                 {menuItems.map((item) => {
                   const Icon = item.icon;
