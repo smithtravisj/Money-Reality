@@ -25,7 +25,7 @@ export default function BudgetPage() {
     deleteSavingsCategory,
   } = useAppStore();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', parentGroup: '' });
+  const [formData, setFormData] = useState({ name: '', parentGroup: '', monthlyBudget: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formLoading, setFormLoading] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -88,17 +88,18 @@ export default function BudgetPage() {
 
     setFormLoading(true);
     try {
+      const monthlyBudget = formData.monthlyBudget ? parseFloat(formData.monthlyBudget) : null;
       await addCategory({
         name: formData.name,
         type: 'expense',
         parentGroup: formData.parentGroup,
-        monthlyBudget: null,
+        monthlyBudget,
         colorTag: null,
         icon: null,
         budgetPeriod: 'monthly',
         rolloverBalance: 0,
       });
-      setFormData({ name: '', parentGroup: '' });
+      setFormData({ name: '', parentGroup: '', monthlyBudget: '' });
       setFormErrors({});
       setShowAddForm(false);
     } catch (error) {
@@ -179,6 +180,15 @@ export default function BudgetPage() {
                 onChange={(e) => setFormData((prev) => ({ ...prev, parentGroup: e.target.value }))}
                 placeholder="e.g., Food"
                 error={formErrors.parentGroup}
+              />
+
+              <Input
+                label="Monthly Budget (Optional)"
+                type="number"
+                step="0.01"
+                value={formData.monthlyBudget}
+                onChange={(e) => setFormData((prev) => ({ ...prev, monthlyBudget: e.target.value }))}
+                placeholder="e.g., 500.00"
               />
 
               {formErrors.submit && (
