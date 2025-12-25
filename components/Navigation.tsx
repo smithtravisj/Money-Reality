@@ -9,7 +9,6 @@ import {
   List,
   Wallet,
   PieChart,
-  Calendar,
   TrendingUp,
   Settings,
   User,
@@ -23,10 +22,9 @@ import {
 const menuItems = [
   { name: 'Budget', path: '/budget', icon: PieChart },
   { name: 'Transactions', path: '/transactions', icon: List },
-  { name: 'Accounts', path: '/accounts', icon: Wallet },
   { name: 'Credit Cards', path: '/credit-cards', icon: CreditCard },
   { name: 'Gift Cards', path: '/gift-cards', icon: Gift },
-  { name: 'Weekly Check-in', path: '/weekly-checkin', icon: Calendar },
+  { name: 'Accounts', path: '/accounts', icon: Wallet },
   { name: 'Analytics', path: '/analytics', icon: TrendingUp },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
