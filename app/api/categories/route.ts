@@ -42,7 +42,7 @@ export const GET = withRateLimit(async function (_request: NextRequest) {
  * POST /api/categories
  * Create a new category (expense or income)
  * Required fields: name, type, parentGroup
- * Optional fields: colorTag, icon
+ * Optional fields: colorTag, icon, monthlyBudget
  */
 export const POST = withRateLimit(async function (req: NextRequest) {
   try {
@@ -108,6 +108,19 @@ export const POST = withRateLimit(async function (req: NextRequest) {
 
     const nextOrder = (lastCategory?.order ?? 0) + 1;
 
+    // Validate and parse monthlyBudget if provided
+    let monthlyBudget = null;
+    if (data.monthlyBudget !== undefined && data.monthlyBudget !== null && data.monthlyBudget !== '') {
+      const budgetAmount = parseFloat(data.monthlyBudget);
+      if (isNaN(budgetAmount) || budgetAmount < 0) {
+        return NextResponse.json(
+          { error: 'Monthly budget must be a valid positive number' },
+          { status: 400 }
+        );
+      }
+      monthlyBudget = budgetAmount;
+    }
+
     // Create category
     const category = await prisma.category.create({
       data: {
@@ -115,6 +128,7 @@ export const POST = withRateLimit(async function (req: NextRequest) {
         name: data.name,
         type: data.type,
         parentGroup: data.parentGroup,
+        monthlyBudget,
         colorTag: data.colorTag || null,
         icon: data.icon || null,
         order: nextOrder,
