@@ -11,6 +11,8 @@ import { withRateLimit } from '@/lib/withRateLimit';
 export const GET = withRateLimit(async function (_request: NextRequest) {
   try {
     console.log('[GET /api/gift-cards] Starting...');
+    console.log('[GET /api/gift-cards] prisma type:', typeof prisma);
+    console.log('[GET /api/gift-cards] prisma keys:', prisma ? Object.keys(prisma).slice(0, 10) : 'undefined');
 
     const session = await getServerSession(authConfig);
     console.log('[GET /api/gift-cards] Session check:', {
@@ -25,6 +27,14 @@ export const GET = withRateLimit(async function (_request: NextRequest) {
         { error: 'Please sign in to continue' },
         { status: 401 }
       );
+    }
+
+    // Debug: Check if giftCard model exists
+    console.log('[GET /api/gift-cards] prisma.giftCard type:', typeof prisma?.giftCard);
+    console.log('[GET /api/gift-cards] prisma.giftCard keys:', prisma?.giftCard ? Object.keys(prisma.giftCard).slice(0, 5) : 'undefined');
+
+    if (!prisma || typeof prisma.giftCard === 'undefined') {
+      throw new Error('Prisma giftCard model not found. Prisma instance: ' + (typeof prisma) + ', giftCard: ' + (typeof prisma?.giftCard));
     }
 
     console.log(`[GET /api/gift-cards] Fetching gift cards for user: ${session.user.id}`);
