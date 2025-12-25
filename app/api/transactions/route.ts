@@ -224,12 +224,68 @@ async function processIncomeAllocations(
 
 /**
  * Helper function to recalculate and update account balance
+ * Ensures account has an initial transaction for proper balance tracking
  */
 async function updateAccountBalance(accountId: string, userId: string) {
-  const transactions = await prisma.transaction.findMany({
-    where: { accountId, userId },
+  const account = await prisma.account.findFirst({
+    where: { id: accountId, userId },
   });
 
+  if (!account) return;
+
+  const transactions = await prisma.transaction.findMany({
+    where: { accountId, userId },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  // Check if account has an "Initial account balance" transaction
+  const hasInitialTransaction = transactions.some(
+    t => t.notes === 'Initial account balance'
+  );
+
+  // If account has transactions but no initial transaction, and currentBalance > 0,
+  // create an initial transaction to ensure proper balance tracking
+  if (!hasInitialTransaction && transactions.length > 0 && account.currentBalance > 0) {
+    const nonInitialBalance = transactions.reduce((acc, t) => {
+      return acc + (t.type === 'income' ? t.amount : -t.amount);
+    }, 0);
+
+    // If there's a discrepancy, the account likely had an initial balance that wasn't tracked
+    if (account.currentBalance !== nonInitialBalance) {
+      const initialBalance = account.currentBalance - nonInitialBalance;
+      if (initialBalance > 0) {
+        await prisma.transaction.create({
+          data: {
+            userId,
+            type: 'income',
+            amount: initialBalance,
+            date: new Date(0), // Epoch start to ensure it's first chronologically
+            accountId,
+            notes: 'Initial account balance',
+            allocations: '[]',
+          },
+        });
+
+        // Refetch transactions after creating initial transaction
+        const updatedTransactions = await prisma.transaction.findMany({
+          where: { accountId, userId },
+        });
+
+        const balance = updatedTransactions.reduce((acc, t) => {
+          return acc + (t.type === 'income' ? t.amount : -t.amount);
+        }, 0);
+
+        await prisma.account.update({
+          where: { id: accountId },
+          data: { currentBalance: balance },
+        });
+
+        return;
+      }
+    }
+  }
+
+  // Standard balance recalculation
   const balance = transactions.reduce((acc, t) => {
     return acc + (t.type === 'income' ? t.amount : -t.amount);
   }, 0);
