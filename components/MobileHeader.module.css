@@ -1,7 +1,6 @@
 @media (max-width: 767px) {
   .header {
-    height: 16px;
-    display: block;
+    display: none;
   }
 }
 
