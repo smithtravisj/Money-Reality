@@ -9,31 +9,10 @@ interface CategoryData {
 }
 
 const DEFAULT_CATEGORIES: CategoryData[] = [
-  // Essentials - Expense
+  // Minimal starter categories for new users
   { name: 'Groceries', type: 'expense', parentGroup: 'Essentials' },
   { name: 'Rent', type: 'expense', parentGroup: 'Essentials' },
-  { name: 'Utilities', type: 'expense', parentGroup: 'Essentials' },
-  { name: 'Transport', type: 'expense', parentGroup: 'Essentials' },
-
-  // Lifestyle - Expense
-  { name: 'Dining', type: 'expense', parentGroup: 'Lifestyle' },
-  { name: 'Entertainment', type: 'expense', parentGroup: 'Lifestyle' },
-  { name: 'Shopping', type: 'expense', parentGroup: 'Lifestyle' },
-
-  // Health - Expense
-  { name: 'Medical', type: 'expense', parentGroup: 'Health' },
-  { name: 'Fitness', type: 'expense', parentGroup: 'Health' },
-  { name: 'Wellness', type: 'expense', parentGroup: 'Health' },
-
-  // Personal - Expense
-  { name: 'Subscriptions', type: 'expense', parentGroup: 'Personal' },
-  { name: 'Services', type: 'expense', parentGroup: 'Personal' },
-  { name: 'Miscellaneous', type: 'expense', parentGroup: 'Personal' },
-
-  // Income
   { name: 'Salary', type: 'income', parentGroup: 'Income' },
-  { name: 'Freelance', type: 'income', parentGroup: 'Income' },
-  { name: 'Other Income', type: 'income', parentGroup: 'Income' },
 ];
 
 /**
