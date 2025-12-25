@@ -6,5 +6,8 @@
   "deploy": {
     "numReplicas": 1,
     "startCommand": "npm run start"
+  },
+  "environment": {
+    "NIXPACKS_NODE_VERSION": "20"
   }
 }
