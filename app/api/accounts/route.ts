@@ -166,6 +166,21 @@ export const POST = withRateLimit(async function (req: NextRequest) {
       },
     });
 
+    // If account has an initial balance, create an initial transaction to track it
+    if (currentBalance > 0) {
+      await prisma.transaction.create({
+        data: {
+          userId: session.user.id,
+          type: 'income',
+          amount: currentBalance,
+          date: new Date(),
+          accountId: account.id,
+          notes: 'Initial account balance',
+          allocations: '[]',
+        },
+      });
+    }
+
     // Update settings if this is the default account
     if (isDefault) {
       await prisma.settings.upsert({
