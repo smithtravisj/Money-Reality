@@ -198,23 +198,21 @@ const useAppStore = create<AppStore>((set, get) => ({
 
   loadFromDatabase: async () => {
     try {
-      const [transactionsRes, categoriesRes, accountsRes, checkinsRes, settingsRes, savingsCategoriesRes] = await Promise.all([
+      const [transactionsRes, categoriesRes, accountsRes, settingsRes, savingsCategoriesRes] = await Promise.all([
         fetch('/api/transactions'),
         fetch('/api/categories'),
         fetch('/api/accounts'),
-        fetch('/api/weekly-checkins'),
         fetch('/api/settings'),
         fetch('/api/savings-categories'),
       ]);
 
-      if (!transactionsRes.ok || !categoriesRes.ok || !accountsRes.ok || !checkinsRes.ok || !settingsRes.ok || !savingsCategoriesRes.ok) {
+      if (!transactionsRes.ok || !categoriesRes.ok || !accountsRes.ok || !settingsRes.ok || !savingsCategoriesRes.ok) {
         throw new Error('Failed to fetch data');
       }
 
       const transactionsData = await transactionsRes.json();
       const categoriesData = await categoriesRes.json();
       const accountsData = await accountsRes.json();
-      const checkinsData = await checkinsRes.json();
       const settingsData = await settingsRes.json();
       const savingsCategoriesData = await savingsCategoriesRes.json();
 
@@ -224,7 +222,7 @@ const useAppStore = create<AppStore>((set, get) => ({
         transactions: transactionsData.transactions || [],
         categories: categoriesData.categories || [],
         accounts: accountsData.accounts || [],
-        weeklyCheckins: checkinsData.checkins || [],
+        weeklyCheckins: [],
         savingsCategories: savingsCategoriesData.categories || [],
         settings: settingsData.settings || DEFAULT_SETTINGS,
         error: null,
