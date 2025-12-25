@@ -26,6 +26,7 @@ export default function GiftCardsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
   const [formData, setFormData] = useState<GiftCardFormData>({
     name: '',
     initialBalance: '',
@@ -44,17 +45,26 @@ export default function GiftCardsPage() {
   const loadGiftCards = async () => {
     try {
       setPageLoading(true);
+      setPageError(null);
       const response = await fetch('/api/gift-cards');
       const data = await response.json();
 
+      console.log('[loadGiftCards] Response status:', response.status);
+      console.log('[loadGiftCards] Response data:', data);
+
       if (!response.ok) {
-        console.error('Gift cards API error:', data);
-        throw new Error(data.error || 'Failed to load gift cards');
+        const errorMsg = data.error || data.message || 'Failed to load gift cards';
+        console.error('Gift cards API error:', { status: response.status, data });
+        setPageError(errorMsg);
+        throw new Error(errorMsg);
       }
 
       setGiftCards(data.giftCards || []);
+      setPageError(null);
     } catch (error) {
       console.error('Failed to load gift cards:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to load gift cards';
+      setPageError(errorMsg);
     } finally {
       setPageLoading(false);
     }
@@ -337,6 +347,15 @@ export default function GiftCardsPage() {
       )}
 
       <div style={{ padding: 'var(--card-padding)' }} className="page-container">
+        {/* Error Message */}
+        {pageError && (
+          <Card style={{ marginBottom: 'var(--space-4)', backgroundColor: 'var(--status-danger-bg)', borderColor: 'var(--status-danger)' }}>
+            <div style={{ color: 'var(--status-danger)', fontSize: 'var(--font-size-sm)' }}>
+              <strong>Error:</strong> {pageError}
+            </div>
+          </Card>
+        )}
+
         {/* Summary */}
         {giftCards.length > 0 && (
           <Card style={{ marginBottom: 'var(--space-4)' }}>

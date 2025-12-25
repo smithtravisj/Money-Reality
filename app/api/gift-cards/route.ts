@@ -11,23 +11,28 @@ import { withRateLimit } from '@/lib/withRateLimit';
 export const GET = withRateLimit(async function (_request: NextRequest) {
   try {
     const session = await getServerSession(authConfig);
+    console.log('[GET /api/gift-cards] Session check:', { hasSession: !!session, userId: session?.user?.id });
 
     if (!session?.user?.id) {
+      console.log('[GET /api/gift-cards] No authenticated user');
       return NextResponse.json(
         { error: 'Please sign in to continue' },
         { status: 401 }
       );
     }
 
+    console.log(`[GET /api/gift-cards] Fetching gift cards for user: ${session.user.id}`);
     const giftCards = await prisma.giftCard.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
     });
 
+    console.log(`[GET /api/gift-cards] Found ${giftCards.length} gift cards`);
     return NextResponse.json({ giftCards });
   } catch (error) {
-    console.error('Error fetching gift cards:', error);
+    console.error('[GET /api/gift-cards] Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[GET /api/gift-cards] Error message:', errorMessage);
     return NextResponse.json(
       { error: 'Failed to fetch gift cards', details: errorMessage },
       { status: 500 }
