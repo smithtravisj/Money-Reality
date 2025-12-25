@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/useMediaQuery';
-import { useState } from 'react';
+import { useMobileNav } from '@/context/MobileNavContext';
 import styles from './Navigation.module.css';
 import {
   List,
@@ -13,8 +13,6 @@ import {
   Settings,
   User,
   LogOut,
-  Menu,
-  X,
   CreditCard,
   Gift,
 } from 'lucide-react';
@@ -34,7 +32,7 @@ export default function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const { isDrawerOpen, closeDrawer } = useMobileNav();
 
   if (status !== 'authenticated') {
     return null;
@@ -42,11 +40,11 @@ export default function Navigation() {
 
   const handleNavigation = (path: string) => {
     router.push(path);
-    setIsMobileDrawerOpen(false);
+    closeDrawer();
   };
 
   const handleSignOut = async () => {
-    setIsMobileDrawerOpen(false);
+    closeDrawer();
     await signOut({ redirect: true, callbackUrl: '/login' });
   };
 
@@ -54,26 +52,9 @@ export default function Navigation() {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Header with Menu Button */}
-        <div className={styles.mobileHeader}>
-          <div>
-            <h1 className={styles.mobileTitle}>Money Reality</h1>
-            {session?.user?.name && (
-              <p className={styles.mobileUserName}>{session.user.name}</p>
-            )}
-          </div>
-          <button
-            onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
-            className={styles.menuButton}
-            aria-label="Toggle menu"
-          >
-            {isMobileDrawerOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
         {/* Mobile Drawer */}
-        {isMobileDrawerOpen && (
-          <div className={styles.mobileDrawerOverlay} onClick={() => setIsMobileDrawerOpen(false)}>
+        {isDrawerOpen && (
+          <div className={styles.mobileDrawerOverlay} onClick={closeDrawer}>
             <nav className={styles.mobileDrawer} onClick={(e) => e.stopPropagation()}>
               <div className={styles.navList}>
                 {menuItems.map((item) => {

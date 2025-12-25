@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import Navigation from './Navigation';
+import { MobileHeader } from './MobileHeader';
+import { FloatingMenuButton } from './FloatingMenuButton';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 
 export default function LayoutWrapper({ children }: { children: ReactNode }) {
@@ -52,28 +54,23 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
     );
   }
 
-  // Mobile layout with drawer navigation
+  // Mobile layout with FAB + drawer navigation
   if (isMobile) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          backgroundColor: 'var(--bg)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <>
+        <MobileHeader />
         <Navigation />
+        <FloatingMenuButton />
         <main
           style={{
-            flex: 1,
-            overflow: 'auto',
-            paddingBottom: '80px',
+            minHeight: '100vh',
+            backgroundColor: 'var(--bg)',
+            paddingBottom: '100px',
           }}
         >
           {children}
         </main>
-      </div>
+      </>
     );
   }
 
