@@ -27,8 +27,9 @@ export const GET = withRateLimit(async function (_request: NextRequest) {
     return NextResponse.json({ giftCards });
   } catch (error) {
     console.error('Error fetching gift cards:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch gift cards' },
+      { error: 'Failed to fetch gift cards', details: errorMessage },
       { status: 500 }
     );
   }

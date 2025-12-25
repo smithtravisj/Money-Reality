@@ -45,8 +45,13 @@ export default function GiftCardsPage() {
     try {
       setPageLoading(true);
       const response = await fetch('/api/gift-cards');
-      if (!response.ok) throw new Error('Failed to load gift cards');
       const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Gift cards API error:', data);
+        throw new Error(data.error || 'Failed to load gift cards');
+      }
+
       setGiftCards(data.giftCards || []);
     } catch (error) {
       console.error('Failed to load gift cards:', error);
