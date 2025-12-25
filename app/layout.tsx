@@ -31,7 +31,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.className} style={{ backgroundColor: '#0b0f14' }}>
+    <html
+      lang="en"
+      className={inter.className}
+      style={{
+        backgroundColor: '#0b0f14',
+        '--sidebar-w': '280px',
+        '--bg': '#080a0a',
+        '--text': '#e7e7e7',
+        '--border': 'rgba(255, 255, 255, 0.08)',
+        '--panel': '#141618',
+      } as React.CSSProperties}
+    >
       <head>
         <meta name="color-scheme" content="dark" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -45,9 +56,28 @@ export default function RootLayout({
           @supports (color-scheme: dark) {
             :root { color-scheme: dark; }
           }
+          :root {
+            --sidebar-w: 280px;
+            --bg: #080a0a;
+            --text: #e7e7e7;
+            --border: rgba(255, 255, 255, 0.08);
+            --panel: #141618;
+          }
           html {
             background-color: #0b0f14 !important;
             color: #e6edf6 !important;
+          }
+          body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+          }
+          @media (min-width: 768px) {
+            [style*="gridTemplateColumns: 'var(--sidebar-w"] {
+              display: grid;
+              gridTemplateColumns: 280px 1fr;
+            }
           }
         `}</style>
       </head>

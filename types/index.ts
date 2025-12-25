@@ -14,6 +14,7 @@ export interface Transaction {
   type: 'expense' | 'income';
   amount: number;
   date: string;
+  accountId: string;
   categoryId: string | null;
   merchant: string | null;
   paymentMethod: string | null;
@@ -21,6 +22,26 @@ export interface Transaction {
   createdAt: string;
   updatedAt: string;
   category?: Category;
+  account?: Account;
+}
+
+// Account types
+export type AccountType = 'checking' | 'savings' | 'credit' | 'cash';
+
+export interface Account {
+  id: string;
+  userId: string;
+  name: string;
+  type: AccountType;
+  currentBalance: number;
+  notes: string;
+  colorTag: string | null;
+  icon: string | null;
+  order: number;
+  isDefault: boolean;
+  autoPayAccountId?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Category types
@@ -33,8 +54,25 @@ export interface Category {
   colorTag: string | null;
   icon: string | null;
   order: number;
+  monthlyBudget: number | null;
+  budgetPeriod: string;
+  rolloverBalance: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CategoryRolloverUpdate {
+  categoryId: string;
+  categoryName: string;
+  unspent: number;
+  newRolloverBalance: number;
+}
+
+export interface RolloverSummary {
+  month: string;
+  totalRolledOver: number;
+  categoryUpdates: CategoryRolloverUpdate[];
+  categoriesProcessed: number;
 }
 
 // Weekly check-in types
@@ -71,6 +109,22 @@ export interface Settings {
   enableWarnings: boolean;
   warningThreshold: number | null;
   defaultPaymentMethod: string | null;
+  defaultAccountId: string | null;
+  totalSavings?: number;
+  cardCollapseStates?: string; // JSON string with card collapse states
+}
+
+// Savings Category types
+export interface SavingsCategory {
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  targetAmount: number | null;
+  currentBalance: number;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Financial status types
@@ -99,10 +153,79 @@ export interface SpendingCategory {
   color?: string;
 }
 
+// Budget types
+export interface BudgetStatus {
+  categoryId: string;
+  categoryName: string;
+  budgeted: number;
+  spent: number;
+  available: number;
+  rollover: number;
+  totalAvailable: number;
+  percentUsed: number;
+  overspent: boolean;
+}
+
+export interface BudgetSummary {
+  month: string;
+  totalBudgeted: number;
+  totalSpent: number;
+  totalAvailable: number;
+  categories: BudgetStatus[];
+  overallPercentUsed: number;
+  categoriesOverBudget: number;
+}
+
+export interface AccountBalance {
+  accountId: string;
+  accountName: string;
+  accountType: AccountType;
+  balance: number;
+  transactionCount: number;
+  displayBalance: string;
+}
+
+// Credit card types
+export interface CreditCardMonthlySpending {
+  month: string; // 'YYYY-MM'
+  year: number;
+  monthNum: number;
+  monthName: string; // 'December'
+  spent: number;
+  transactionCount: number;
+  isCurrentMonth: boolean;
+}
+
+export interface CreditCardSummary {
+  cardId: string;
+  cardName: string;
+  currentBalance: number;
+  currentMonthSpending: number;
+  currentMonthTransactionCount: number;
+  autoPayAccount: {
+    id: string;
+    name: string;
+    type: AccountType;
+  } | null;
+}
+
+export interface CreditCardSpendingHistoryResponse {
+  cardId: string;
+  cardName: string;
+  currentMonth: CreditCardMonthlySpending;
+  history: CreditCardMonthlySpending[];
+  autoPayAccount: {
+    id: string;
+    name: string;
+    type: AccountType;
+  } | null;
+}
+
 // Complete app data (for export/import)
 export interface AppData {
   transactions: Transaction[];
   categories: Category[];
+  accounts: Account[];
   weeklyCheckins: WeeklyCheckin[];
   balanceSnapshots: BalanceSnapshot[];
   settings: Settings;
@@ -129,6 +252,14 @@ export interface WeeklyCheckinsResponse {
 
 export interface SettingsResponse {
   settings: Settings;
+}
+
+export interface AccountsResponse {
+  accounts: Account[];
+}
+
+export interface AccountResponse {
+  account: Account;
 }
 
 // Component props types

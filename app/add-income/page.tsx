@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useAppStore from '@/lib/store';
+import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input, { Textarea, Select } from '@/components/ui/Input';
+import AccountSelector from '@/components/AccountSelector';
 
 const PAYMENT_METHODS = [
   { value: 'Cash', label: 'Cash' },
@@ -16,12 +18,15 @@ const PAYMENT_METHODS = [
 
 export default function AddIncomePage() {
   const router = useRouter();
-  const { addTransaction, categories, settings } = useAppStore();
+  const { addTransaction, categories, settings, getDefaultAccount } = useAppStore();
+
+  const defaultAccount = getDefaultAccount();
 
   const [formData, setFormData] = useState({
     amount: '',
     date: new Date().toISOString().slice(0, 16), // datetime-local format
     categoryId: '',
+    accountId: defaultAccount?.id || '',
     merchant: '',
     paymentMethod: settings.defaultPaymentMethod || 'Transfer',
     notes: '',
@@ -56,6 +61,10 @@ export default function AddIncomePage() {
       newErrors.date = 'Date is required';
     }
 
+    if (!formData.accountId) {
+      newErrors.accountId = 'Account is required';
+    }
+
     if (formData.categoryId && !categories.find((c) => c.id === formData.categoryId)) {
       newErrors.categoryId = 'Invalid category selected';
     }
@@ -75,6 +84,7 @@ export default function AddIncomePage() {
         type: 'income',
         amount: parseFloat(formData.amount),
         date: new Date(formData.date).toISOString(),
+        accountId: formData.accountId,
         categoryId: formData.categoryId || null,
         merchant: formData.merchant || null,
         paymentMethod: formData.paymentMethod || null,
@@ -86,6 +96,7 @@ export default function AddIncomePage() {
         amount: '',
         date: new Date().toISOString().slice(0, 16),
         categoryId: '',
+        accountId: defaultAccount?.id || '',
         merchant: '',
         paymentMethod: settings.defaultPaymentMethod || 'Transfer',
         notes: '',
@@ -102,11 +113,9 @@ export default function AddIncomePage() {
   };
 
   return (
-    <div style={{ padding: 'var(--card-padding)' }} className="page-container-narrow">
-      <div style={{ marginBottom: 'var(--space-5)' }}>
-        <h1 className="page-title">Add Income</h1>
-        <p className="page-subtitle">Track your earnings</p>
-      </div>
+    <div>
+      <PageHeader title="Add Income" subtitle="Track your earnings" />
+      <div style={{ padding: 'var(--card-padding)' }} className="page-container-narrow">
 
       <Card>
         <form onSubmit={(e) => handleSubmit(e, true)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
@@ -130,6 +139,13 @@ export default function AddIncomePage() {
             onChange={handleChange}
             required
             error={errors.date}
+          />
+
+          <AccountSelector
+            value={formData.accountId}
+            onChange={(accountId) => setFormData((prev) => ({ ...prev, accountId }))}
+            error={errors.accountId}
+            required
           />
 
           <Select
@@ -191,6 +207,7 @@ export default function AddIncomePage() {
           </div>
         </form>
       </Card>
+      </div>
     </div>
   );
 }

@@ -12,6 +12,9 @@ const DEFAULT_SETTINGS = {
   enableWarnings: true,
   warningThreshold: null,
   defaultPaymentMethod: null,
+  defaultAccountId: null,
+  totalSavings: 0,
+  cardCollapseStates: '{}',
 };
 
 /**
@@ -59,7 +62,7 @@ export const GET = withRateLimit(async function (_request: NextRequest) {
 /**
  * PATCH /api/settings
  * Update user settings
- * Optional fields: theme, currency, safeThreshold, tightThreshold, enableWarnings, warningThreshold, defaultPaymentMethod
+ * Optional fields: theme, currency, safeThreshold, tightThreshold, enableWarnings, warningThreshold, defaultPaymentMethod, defaultAccountId, totalSavings, cardCollapseStates
  */
 export const PATCH = withRateLimit(async function (req: NextRequest) {
   try {
@@ -165,6 +168,45 @@ export const PATCH = withRateLimit(async function (req: NextRequest) {
         }
       }
       updateData.defaultPaymentMethod = data.defaultPaymentMethod;
+    }
+
+    if (data.defaultAccountId !== undefined) {
+      updateData.defaultAccountId = data.defaultAccountId;
+    }
+
+    if (data.totalSavings !== undefined) {
+      if (data.totalSavings !== null) {
+        const totalSavings = parseFloat(data.totalSavings);
+        if (isNaN(totalSavings) || totalSavings < 0) {
+          return NextResponse.json(
+            { error: 'totalSavings must be a non-negative number or null' },
+            { status: 400 }
+          );
+        }
+        updateData.totalSavings = totalSavings;
+      } else {
+        updateData.totalSavings = 0;
+      }
+    }
+
+    if (data.cardCollapseStates !== undefined) {
+      if (typeof data.cardCollapseStates === 'string') {
+        // Validate it's valid JSON
+        try {
+          JSON.parse(data.cardCollapseStates);
+          updateData.cardCollapseStates = data.cardCollapseStates;
+        } catch (e) {
+          return NextResponse.json(
+            { error: 'cardCollapseStates must be valid JSON' },
+            { status: 400 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          { error: 'cardCollapseStates must be a JSON string' },
+          { status: 400 }
+        );
+      }
     }
 
     // Ensure settings exist for this user before updating

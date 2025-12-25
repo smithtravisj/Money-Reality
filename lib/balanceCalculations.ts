@@ -1,4 +1,13 @@
-import { Transaction, FinancialStatus, SpendingCategory, Category } from '@/types';
+import {
+  Transaction,
+  FinancialStatus,
+  SpendingCategory,
+  Category,
+  Account,
+  BudgetStatus,
+  BudgetSummary,
+  AccountBalance,
+} from '@/types';
 
 /**
  * Calculate total balance from all transactions
@@ -217,6 +226,243 @@ export function getSpendingByCategory(
   }
 
   const byCategory = rangeTransactions.reduce((acc, t) => {
+    const categoryId = t.categoryId || 'uncategorized';
+    acc[categoryId] = (acc[categoryId] || 0) + t.amount;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return Object.entries(byCategory)
+    .map(([categoryId, amount]) => {
+      const category = categories.find((c) => c.id === categoryId);
+      return {
+        categoryName: category?.name || 'Uncategorized',
+        categoryId: categoryId === 'uncategorized' ? null : categoryId,
+        amount,
+        percentage: (amount / totalExpenses) * 100,
+        color: category?.colorTag || undefined,
+      };
+    })
+    .sort((a, b) => b.amount - a.amount);
+}
+
+/**
+ * Calculate balance for a specific account
+ * Sums all income and expense transactions for that account
+ */
+export function calculateAccountBalance(
+  transactions: Transaction[],
+  accountId: string
+): number {
+  return transactions
+    .filter((t) => t.accountId === accountId)
+    .reduce((acc, t) => {
+      if (t.type === 'income') {
+        return acc + t.amount;
+      } else if (t.type === 'expense') {
+        return acc - t.amount;
+      }
+      return acc;
+    }, 0);
+}
+
+/**
+ * Calculate balances for all accounts
+ * Returns a map of accountId -> balance
+ * Uses currentBalance from database (already kept in sync with transactions by the API)
+ */
+export function calculateAllAccountBalances(
+  _transactions: Transaction[],
+  accounts: Account[]
+): Record<string, number> {
+  const balances: Record<string, number> = {};
+
+  accounts.forEach((account) => {
+    // Use the account's current balance from the database
+    // (it's already kept in sync with transactions by the API)
+    balances[account.id] = account.currentBalance;
+  });
+
+  return balances;
+}
+
+/**
+ * Get account balances with metadata and display formatting
+ * Includes account names, types, and properly formatted display balances
+ * Credit cards display as "Owed: $X" when negative
+ */
+export function getAccountBalances(
+  transactions: Transaction[],
+  accounts: Account[]
+): AccountBalance[] {
+  const { formatCurrency } = require('@/lib/formatters');
+  const balances = calculateAllAccountBalances(transactions, accounts);
+
+  return accounts.map((account) => {
+    const balance = balances[account.id];
+    const transactionCount = transactions.filter(
+      (t) => t.accountId === account.id
+    ).length;
+
+    let displayBalance: string;
+    if (account.type === 'credit' && balance < 0) {
+      displayBalance = `Owed: $${formatCurrency(Math.abs(balance))}`;
+    } else if (balance < 0) {
+      displayBalance = `-$${formatCurrency(Math.abs(balance))}`;
+    } else {
+      displayBalance = `$${formatCurrency(balance)}`;
+    }
+
+    return {
+      accountId: account.id,
+      accountName: account.name,
+      accountType: account.type,
+      balance,
+      transactionCount,
+      displayBalance,
+    };
+  });
+}
+
+/**
+ * Calculate total net worth across all accounts
+ * Sum of all account balances
+ */
+export function calculateTotalNetWorth(
+  transactions: Transaction[],
+  accounts: Account[]
+): number {
+  const balances = calculateAllAccountBalances(transactions, accounts);
+  return Object.values(balances).reduce((sum, balance) => sum + balance, 0);
+}
+
+/**
+ * Calculate budget status for a single category
+ * Shows budgeted, spent, and available amounts with percentage
+ * Month format: YYYY-MM
+ */
+export function calculateCategoryBudgetStatus(
+  category: Category,
+  transactions: Transaction[],
+  month: string
+): BudgetStatus | null {
+  // If no budget is set for this category, return null
+  if (!category.monthlyBudget) {
+    return null;
+  }
+
+  // Parse month string (YYYY-MM) to get date range
+  const [year, monthNum] = month.split('-').map(Number);
+  const startDate = new Date(year, monthNum - 1, 1);
+  const endDate = new Date(year, monthNum, 0);
+
+  // Get spending for this category in the month
+  const spent = transactions
+    .filter((t) => {
+      const transDate = new Date(t.date);
+      return (
+        t.type === 'expense' &&
+        t.categoryId === category.id &&
+        transDate >= startDate &&
+        transDate <= endDate
+      );
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const budgeted = category.monthlyBudget;
+  const available = budgeted - spent;
+  const rollover = category.rolloverBalance || 0;
+  const totalAvailable = available + rollover;
+  const percentUsed = (spent / budgeted) * 100;
+
+  return {
+    categoryId: category.id,
+    categoryName: category.name,
+    budgeted,
+    spent,
+    available,
+    rollover,
+    totalAvailable,
+    percentUsed,
+    overspent: spent > budgeted,
+  };
+}
+
+/**
+ * Calculate overall budget summary for a month
+ * Shows total budgeted, spent, available and breakdown by category
+ * Month format: YYYY-MM
+ */
+export function calculateBudgetSummary(
+  categories: Category[],
+  transactions: Transaction[],
+  month: string
+): BudgetSummary {
+  // Get all category budgets for this month
+  const categoryStatuses: BudgetStatus[] = [];
+  let totalBudgeted = 0;
+  let totalSpent = 0;
+  let categoriesOverBudget = 0;
+
+  categories.forEach((category) => {
+    if (category.type === 'expense' && category.monthlyBudget) {
+      const status = calculateCategoryBudgetStatus(category, transactions, month);
+      if (status) {
+        categoryStatuses.push(status);
+        totalBudgeted += status.budgeted;
+        totalSpent += status.spent;
+        if (status.overspent) {
+          categoriesOverBudget += 1;
+        }
+      }
+    }
+  });
+
+  const totalAvailable = totalBudgeted - totalSpent;
+  const overallPercentUsed =
+    totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
+
+  return {
+    month,
+    totalBudgeted,
+    totalSpent,
+    totalAvailable,
+    categories: categoryStatuses.sort((a, b) => b.spent - a.spent),
+    overallPercentUsed,
+    categoriesOverBudget,
+  };
+}
+
+/**
+ * Get spending breakdown by category for a specific month
+ * Similar to getSpendingByCategory but for a specific month
+ * Month format: YYYY-MM
+ */
+export function getMonthlySpendingByCategory(
+  transactions: Transaction[],
+  categories: Category[],
+  month: string
+): SpendingCategory[] {
+  // Parse month string (YYYY-MM) to get date range
+  const [year, monthNum] = month.split('-').map(Number);
+  const startDate = new Date(year, monthNum - 1, 1);
+  const endDate = new Date(year, monthNum, 0);
+
+  const monthTransactions = transactions.filter((t) => {
+    const transDate = new Date(t.date);
+    return (
+      t.type === 'expense' &&
+      transDate >= startDate &&
+      transDate <= endDate
+    );
+  });
+
+  const totalExpenses = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+  if (totalExpenses === 0) {
+    return [];
+  }
+
+  const byCategory = monthTransactions.reduce((acc, t) => {
     const categoryId = t.categoryId || 'uncategorized';
     acc[categoryId] = (acc[categoryId] || 0) + t.amount;
     return acc;

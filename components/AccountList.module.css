@@ -1,0 +1,74 @@
+.accountsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.accountItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-2);
+  background-color: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.accountItem:hover {
+  border-color: var(--text-muted);
+  background-color: var(--panel);
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  word-break: break-word;
+}
+
+.type {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.balance {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text);
+  margin: 4px 0 0 0;
+}
+
+.transactionCount {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0;
+  padding: var(--space-3);
+  text-align: center;
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) {
+  .accountsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .accountsGrid {
+    grid-template-columns: 1fr;
+  }
+}

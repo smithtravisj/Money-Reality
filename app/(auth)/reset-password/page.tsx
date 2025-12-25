@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
             {error}
           </div>
 
-          <Link href="/forgot-password" style={{ display: 'block', color: 'var(--accent)', textDecoration: 'none', fontSize: 'var(--font-size-sm)', fontWeight: '500', textAlign: 'center' }}>
+          <Link href="/forgot-password" style={{ display: 'block', color: 'var(--link)', textDecoration: 'none', fontSize: 'var(--font-size-sm)', fontWeight: '500', textAlign: 'center' }}>
             Request a new reset link
           </Link>
         </Card>

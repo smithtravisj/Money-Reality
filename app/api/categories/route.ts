@@ -73,11 +73,10 @@ export const POST = withRateLimit(async function (req: NextRequest) {
       );
     }
 
-    // Validate parentGroup
-    const validParentGroups = ['Essentials', 'Lifestyle', 'Health', 'Personal', 'Income'];
-    if (!validParentGroups.includes(data.parentGroup)) {
+    // Validate parentGroup is not empty
+    if (!data.parentGroup.trim()) {
       return NextResponse.json(
-        { error: `ParentGroup must be one of: ${validParentGroups.join(', ')}` },
+        { error: 'Group name cannot be empty' },
         { status: 400 }
       );
     }

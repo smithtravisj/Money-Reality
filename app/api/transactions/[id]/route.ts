@@ -145,6 +145,7 @@ export const PATCH = withRateLimit(async function (
  * DELETE /api/transactions/[id]
  * Delete a transaction
  * Only the user who created the transaction can delete it
+ * Also reverses any income allocations to savings categories
  */
 export const DELETE = withRateLimit(async function (
   _request: NextRequest,
@@ -177,10 +178,24 @@ export const DELETE = withRateLimit(async function (
       );
     }
 
+    // Reverse allocations if this was an income transaction with allocations
+    if (transaction.type === 'income' && transaction.allocations && transaction.allocations !== '[]') {
+      try {
+        const allocations = JSON.parse(transaction.allocations);
+        await reverseIncomeAllocations(allocations, transaction.amount, session.user.id);
+      } catch (error) {
+        console.warn('Failed to reverse allocations:', error);
+        // Continue with deletion even if allocation reversal fails
+      }
+    }
+
     // Delete the transaction
     await prisma.transaction.delete({
       where: { id },
     });
+
+    // Recalculate account balance after deletion
+    await updateAccountBalance(transaction.accountId, session.user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -192,3 +207,64 @@ export const DELETE = withRateLimit(async function (
     );
   }
 });
+
+/**
+ * Helper function to reverse income allocations to savings categories
+ */
+async function reverseIncomeAllocations(
+  allocations: Array<{ categoryId: string; amount: number; isPercentage: boolean }>,
+  totalIncome: number,
+  userId: string
+) {
+  for (const allocation of allocations) {
+    if (allocation.amount <= 0) continue;
+
+    // Calculate actual amount that was allocated
+    const actualAmount = allocation.isPercentage
+      ? (totalIncome * allocation.amount) / 100
+      : allocation.amount;
+
+    if (actualAmount <= 0) continue;
+
+    // Verify savings category belongs to user
+    const savingsCategory = await prisma.savingsCategory.findFirst({
+      where: {
+        id: allocation.categoryId,
+        userId,
+      },
+    });
+
+    if (!savingsCategory) {
+      console.warn(`Savings category ${allocation.categoryId} not found for user ${userId}`);
+      continue;
+    }
+
+    // Subtract from savings category balance
+    await prisma.savingsCategory.update({
+      where: { id: allocation.categoryId },
+      data: {
+        currentBalance: {
+          decrement: actualAmount,
+        },
+      },
+    });
+  }
+}
+
+/**
+ * Helper function to recalculate and update account balance
+ */
+async function updateAccountBalance(accountId: string, userId: string) {
+  const transactions = await prisma.transaction.findMany({
+    where: { accountId, userId },
+  });
+
+  const balance = transactions.reduce((acc, t) => {
+    return acc + (t.type === 'income' ? t.amount : -t.amount);
+  }, 0);
+
+  await prisma.account.update({
+    where: { id: accountId },
+    data: { currentBalance: balance },
+  });
+}

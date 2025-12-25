@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Settings" ADD COLUMN     "totalSavings" DOUBLE PRECISION NOT NULL DEFAULT 0;

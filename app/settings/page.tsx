@@ -2,19 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import useAppStore from '@/lib/store';
+import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input, { Select } from '@/components/ui/Input';
-
-const CURRENCIES = [
-  { value: 'USD', label: 'US Dollar ($)' },
-  { value: 'EUR', label: 'Euro (€)' },
-  { value: 'GBP', label: 'British Pound (£)' },
-  { value: 'CAD', label: 'Canadian Dollar (C$)' },
-  { value: 'AUD', label: 'Australian Dollar (A$)' },
-  { value: 'JPY', label: 'Japanese Yen (¥)' },
-  { value: 'INR', label: 'Indian Rupee (₹)' },
-];
 
 const PAYMENT_METHODS = [
   { value: '', label: 'None (default)' },
@@ -28,7 +19,10 @@ export default function SettingsPage() {
   const { settings, updateSettings } = useAppStore();
 
   const [formData, setFormData] = useState(settings);
-  const [loading, setLoading] = useState(false);
+  const [loadingThresholds, setLoadingThresholds] = useState(false);
+  const [loadingWarnings, setLoadingWarnings] = useState(false);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [loadingReset, setLoadingReset] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -50,14 +44,13 @@ export default function SettingsPage() {
     setMessage('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleThresholdsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingThresholds(true);
     setMessage('');
 
     try {
       await updateSettings({
-        currency: formData.currency,
         safeThreshold: formData.safeThreshold,
         tightThreshold: formData.tightThreshold,
         warningThreshold: formData.warningThreshold,
@@ -65,18 +58,64 @@ export default function SettingsPage() {
         defaultPaymentMethod: formData.defaultPaymentMethod,
       });
 
-      setMessage('✓ Settings saved successfully!');
+      setMessage('✓ Thresholds saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      setMessage('✗ Failed to save settings. Please try again.');
+      setMessage('✗ Failed to save thresholds. Please try again.');
     } finally {
-      setLoading(false);
+      setLoadingThresholds(false);
+    }
+  };
+
+  const handleWarningsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingWarnings(true);
+    setMessage('');
+
+    try {
+      await updateSettings({
+        safeThreshold: formData.safeThreshold,
+        tightThreshold: formData.tightThreshold,
+        warningThreshold: formData.warningThreshold,
+        enableWarnings: formData.enableWarnings,
+        defaultPaymentMethod: formData.defaultPaymentMethod,
+      });
+
+      setMessage('✓ Warning settings saved successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('✗ Failed to save warning settings. Please try again.');
+    } finally {
+      setLoadingWarnings(false);
+    }
+  };
+
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingPayment(true);
+    setMessage('');
+
+    try {
+      await updateSettings({
+        safeThreshold: formData.safeThreshold,
+        tightThreshold: formData.tightThreshold,
+        warningThreshold: formData.warningThreshold,
+        enableWarnings: formData.enableWarnings,
+        defaultPaymentMethod: formData.defaultPaymentMethod,
+      });
+
+      setMessage('✓ Payment method saved successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('✗ Failed to save payment method. Please try again.');
+    } finally {
+      setLoadingPayment(false);
     }
   };
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingReset(true);
     setMessage('');
 
     try {
@@ -102,49 +141,32 @@ export default function SettingsPage() {
     } catch (error) {
       setMessage('✗ Failed to reset settings. Please try again.');
     } finally {
-      setLoading(false);
+      setLoadingReset(false);
     }
   };
 
   return (
-    <div style={{ padding: 'var(--card-padding)' }} className="page-container-narrow">
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <h1 className="page-title">Settings</h1>
-        <p className="page-subtitle">Customize your Money Reality experience</p>
-      </div>
+    <div>
+      <PageHeader title="Settings" subtitle="Customize your Money Reality experience" />
+      <div style={{ padding: 'var(--card-padding)' }} className="page-container">
+        {message && (
+          <div
+            style={{
+              padding: 'var(--space-2) var(--space-3)',
+              backgroundColor: message.includes('✓') ? 'var(--status-safe-bg)' : 'var(--status-danger-bg)',
+              color: message.includes('✓') ? 'var(--status-safe)' : 'var(--status-danger)',
+              borderRadius: 'var(--radius-control)',
+              fontSize: 'var(--font-size-sm)',
+              marginBottom: 'var(--space-4)',
+            }}
+          >
+            {message}
+          </div>
+        )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-4)' }}>
 
-      <Card title="Display & Currency">
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-          <Select
-            label="Currency"
-            name="currency"
-            value={formData.currency}
-            onChange={handleChange}
-            options={CURRENCIES}
-          />
-
-          {message && (
-            <div
-              style={{
-                padding: 'var(--space-2) var(--space-3)',
-                backgroundColor: message.includes('✓') ? 'var(--status-safe-bg)' : 'var(--status-danger-bg)',
-                color: message.includes('✓') ? 'var(--status-safe)' : 'var(--status-danger)',
-                borderRadius: 'var(--radius-control)',
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
-              {message}
-            </div>
-          )}
-
-          <Button type="submit" variant="primary" size="lg" loading={loading} style={{ marginTop: 'var(--space-3)' }}>
-            Save Changes
-          </Button>
-        </form>
-      </Card>
-
-      <Card title="Financial Thresholds" style={{ marginTop: 'var(--space-4)' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <Card title="Financial Thresholds">
+        <form onSubmit={handleThresholdsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--panel-2)', borderRadius: 'var(--radius-control)' }}>
             <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', margin: '0 0 var(--space-2) 0' }}>
               Define your balance thresholds to categorize your financial status:
@@ -178,14 +200,14 @@ export default function SettingsPage() {
             helperText="Leave empty for default (200)"
           />
 
-          <Button type="submit" variant="primary" size="lg" loading={loading}>
+          <Button type="submit" variant="primary" size="lg" loading={loadingThresholds}>
             Save Thresholds
           </Button>
         </form>
       </Card>
 
-      <Card title="Warnings" style={{ marginTop: 'var(--space-4)' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <Card title="Warnings">
+        <form onSubmit={handleWarningsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer' }}>
               <input
@@ -214,14 +236,14 @@ export default function SettingsPage() {
             />
           )}
 
-          <Button type="submit" variant="primary" size="lg" loading={loading}>
+          <Button type="submit" variant="primary" size="lg" loading={loadingWarnings}>
             Save Warning Settings
           </Button>
         </form>
       </Card>
 
-      <Card title="Default Payment Method" style={{ marginTop: 'var(--space-4)' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <Card title="Default Payment Method">
+        <form onSubmit={handlePaymentSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <Select
             label="Preferred Payment Method"
             name="defaultPaymentMethod"
@@ -231,13 +253,13 @@ export default function SettingsPage() {
             helperText="Used as default when adding new transactions"
           />
 
-          <Button type="submit" variant="primary" size="lg" loading={loading}>
+          <Button type="submit" variant="primary" size="lg" loading={loadingPayment}>
             Save Payment Method
           </Button>
         </form>
       </Card>
 
-      <Card title="Reset" style={{ marginTop: 'var(--space-4)' }}>
+      <Card title="Reset">
         <div style={{ marginBottom: 'var(--space-3)' }}>
           <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-3) 0', fontSize: 'var(--font-size-sm)' }}>
             Reset all settings to their default values. This action cannot be undone.
@@ -247,12 +269,15 @@ export default function SettingsPage() {
             variant="danger"
             size="lg"
             onClick={handleReset}
-            loading={loading}
+            loading={loadingReset}
+            style={{ backgroundColor: '#660000', border: '1px solid rgba(255, 255, 255, 0.1)' }}
           >
             Reset All Settings
           </Button>
         </div>
       </Card>
+        </div>
+      </div>
     </div>
   );
 }

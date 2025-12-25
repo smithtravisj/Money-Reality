@@ -6,32 +6,31 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useState } from 'react';
 import styles from './Navigation.module.css';
 import {
-  LayoutDashboard,
-  Plus,
-  Minus,
   List,
-  FolderTree,
+  Wallet,
+  PieChart,
   Calendar,
   TrendingUp,
   Settings,
+  User,
   LogOut,
   Menu,
   X,
+  CreditCard,
 } from 'lucide-react';
 
 const menuItems = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { name: 'Add Expense', path: '/add-expense', icon: Minus },
-  { name: 'Add Income', path: '/add-income', icon: Plus },
+  { name: 'Budget', path: '/budget', icon: PieChart },
   { name: 'Transactions', path: '/transactions', icon: List },
-  { name: 'Categories', path: '/categories', icon: FolderTree },
+  { name: 'Accounts', path: '/accounts', icon: Wallet },
+  { name: 'Credit Cards', path: '/credit-cards', icon: CreditCard },
   { name: 'Weekly Check-in', path: '/weekly-checkin', icon: Calendar },
   { name: 'Analytics', path: '/analytics', icon: TrendingUp },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
 export default function Navigation() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -57,7 +56,12 @@ export default function Navigation() {
       <>
         {/* Mobile Header with Menu Button */}
         <div className={styles.mobileHeader}>
-          <h1 className={styles.mobileTitle}>Money Reality</h1>
+          <div>
+            <h1 className={styles.mobileTitle}>Money Reality</h1>
+            {session?.user?.name && (
+              <p className={styles.mobileUserName}>{session.user.name}</p>
+            )}
+          </div>
           <button
             onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
             className={styles.menuButton}
@@ -104,6 +108,9 @@ export default function Navigation() {
       <div className={styles.sidebarContent}>
         <div className={styles.logo}>
           <h2>Money Reality</h2>
+          {session?.user?.name && (
+            <p className={styles.userName}>{session.user.name}</p>
+          )}
         </div>
 
         <div className={styles.navList}>
@@ -124,10 +131,20 @@ export default function Navigation() {
           })}
         </div>
 
-        <button onClick={handleSignOut} className={styles.signOutButton}>
-          <LogOut size={20} />
-          <span>Sign Out</span>
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginTop: 'auto' }}>
+          <button
+            onClick={() => handleNavigation('/profile')}
+            className={styles.profileButton}
+            title="Profile"
+          >
+            <User size={20} />
+            <span>Profile</span>
+          </button>
+          <button onClick={handleSignOut} className={styles.signOutButton}>
+            <LogOut size={20} />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
     </nav>
   );

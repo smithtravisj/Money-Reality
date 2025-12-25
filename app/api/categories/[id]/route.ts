@@ -66,10 +66,9 @@ export const PATCH = withRateLimit(async function (
     }
 
     if (data.parentGroup !== undefined) {
-      const validParentGroups = ['Essentials', 'Lifestyle', 'Health', 'Personal', 'Income'];
-      if (!validParentGroups.includes(data.parentGroup)) {
+      if (!data.parentGroup.trim()) {
         return NextResponse.json(
-          { error: `ParentGroup must be one of: ${validParentGroups.join(', ')}` },
+          { error: 'Group name cannot be empty' },
           { status: 400 }
         );
       }
@@ -92,6 +91,14 @@ export const PATCH = withRateLimit(async function (
         );
       }
       updateData.order = data.order;
+    }
+
+    if (data.monthlyBudget !== undefined) {
+      updateData.monthlyBudget = data.monthlyBudget === null ? null : parseFloat(data.monthlyBudget);
+    }
+
+    if (data.budgetPeriod !== undefined) {
+      updateData.budgetPeriod = data.budgetPeriod;
     }
 
     // Update category

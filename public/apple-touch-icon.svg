@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <!-- Background -->
+  <rect width="180" height="180" fill="#0b0f14" rx="39"/>
+
+  <!-- Rounded square border -->
+  <rect width="180" height="180" fill="none" stroke="#64748b" stroke-width="2" rx="39"/>
+
+  <!-- Balance scale -->
+  <g transform="translate(90, 90)">
+    <!-- Scale beam -->
+    <line x1="-35" y1="0" x2="35" y2="0" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Left pan (spending) -->
+    <rect x="-48" y="10" width="18" height="14" fill="none" stroke="#e5534b" stroke-width="1.5" rx="2"/>
+    <line x1="-42" y1="10" x2="-42" y2="-10" stroke="#e5534b" stroke-width="1.5"/>
+    <line x1="-36" y1="10" x2="-36" y2="-10" stroke="#e5534b" stroke-width="1.5"/>
+
+    <!-- Right pan (income) -->
+    <rect x="30" y="10" width="18" height="14" fill="none" stroke="#57ab5a" stroke-width="1.5" rx="2"/>
+    <line x1="36" y1="10" x2="36" y2="-10" stroke="#57ab5a" stroke-width="1.5"/>
+    <line x1="42" y1="10" x2="42" y2="-10" stroke="#57ab5a" stroke-width="1.5"/>
+
+    <!-- Fulcrum -->
+    <polygon points="0,0 -8,15 8,15" fill="#64748b"/>
+
+    <!-- Symbols -->
+    <text x="-39" y="32" font-size="8" fill="#e5534b" text-anchor="middle" font-weight="bold">−</text>
+    <text x="39" y="32" font-size="8" fill="#57ab5a" text-anchor="middle" font-weight="bold">+</text>
+  </g>
+</svg>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import useAppStore from '@/lib/store';
+import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Input';
@@ -92,13 +93,12 @@ export default function WeeklyCheckinPage() {
   const monthData = getMonthSpending(transactions);
 
   return (
-    <div style={{ padding: 'var(--card-padding)' }} className="page-container-narrow">
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <h1 className="page-title">Weekly Check-in</h1>
-        <p className="page-subtitle">
-          {monday.toLocaleDateString()} – {sunday.toLocaleDateString()}
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Weekly Check-in"
+        subtitle={`${monday.toLocaleDateString()} – ${sunday.toLocaleDateString()}`}
+      />
+      <div style={{ padding: 'var(--card-padding)' }} className="page-container-narrow">
 
       {/* Summary Card */}
       <Card title="Week Summary" style={{ marginBottom: 'var(--space-4)' }}>
@@ -250,6 +250,7 @@ export default function WeeklyCheckinPage() {
           </div>
         </div>
       </Card>
+      </div>
     </div>
   );
 }

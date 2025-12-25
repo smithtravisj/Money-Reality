@@ -2,7 +2,7 @@
 .sidebar {
   background-color: var(--panel);
   border-right: 1px solid var(--border);
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-4) var(--space-4) var(--space-4);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -16,27 +16,33 @@
 .sidebarContent {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
   height: 100%;
 }
 
 .logo {
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: var(--space-2);
+  padding: 0 0 4px 0;
+  margin-bottom: 0;
 }
 
 .logo h2 {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  margin: 0;
+  font-size: var(--font-size-4xl);
+  font-weight: 500;
+  margin: 0 0 -8px 0;
   color: var(--text);
+}
+
+.userName {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin: 0 0 0 var(--space-3);
+  font-weight: 500;
 }
 
 .navList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0;
   flex: 1;
 }
 
@@ -64,10 +70,32 @@
 }
 
 .navItem.active {
-  background-color: var(--accent-2);
-  color: var(--accent);
-  border-left: 3px solid var(--accent);
-  padding-left: calc(var(--space-3) - 3px);
+  background-color: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.profileButton:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text);
 }
 
 .signOutButton {
@@ -77,18 +105,17 @@
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-control);
   border: 1px solid var(--border);
-  background: transparent;
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--danger);
   font-size: var(--font-size-base);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
   text-align: left;
-  margin-top: auto;
 }
 
 .signOutButton:hover {
-  background-color: rgba(229, 83, 75, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   border-color: var(--danger);
 }
 
@@ -106,10 +133,17 @@
 }
 
 .mobileTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-size: var(--font-size-3xl);
+  font-weight: 500;
   color: var(--text);
-  margin: 0;
+  margin: 0 0 -8px 0;
+}
+
+.mobileUserName {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0 0 0 var(--space-2);
+  font-weight: 500;
 }
 
 .menuButton {
@@ -186,7 +220,7 @@
   }
 
   .mobileDrawer .navList {
-    gap: 4px;
+    gap: 0;
   }
 
   .mobileDrawer .navItem {

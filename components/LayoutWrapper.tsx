@@ -82,7 +82,7 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'var(--sidebar-w) 1fr',
+        gridTemplateColumns: '280px 1fr',
         gap: 0,
         minHeight: '100vh',
         backgroundColor: 'var(--bg)',

@@ -23,7 +23,10 @@ export const GET = withRateLimit(async function (_request: NextRequest) {
 
     const transactions = await prisma.transaction.findMany({
       where: { userId: session.user.id },
-      include: { category: true },
+      include: {
+        category: true,
+        account: true,
+      },
       orderBy: { date: 'desc' },
     });
 
@@ -59,9 +62,9 @@ export const POST = withRateLimit(async function (req: NextRequest) {
     const data = await req.json();
 
     // Validate required fields
-    if (!data.type || !data.amount || !data.date) {
+    if (!data.type || !data.amount || !data.date || !data.accountId) {
       return NextResponse.json(
-        { error: 'Missing required fields: type, amount, date' },
+        { error: 'Missing required fields: type, amount, date, accountId' },
         { status: 400 }
       );
     }
@@ -97,6 +100,21 @@ export const POST = withRateLimit(async function (req: NextRequest) {
       );
     }
 
+    // Validate account (REQUIRED)
+    const account = await prisma.account.findFirst({
+      where: {
+        id: data.accountId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!account) {
+      return NextResponse.json(
+        { error: 'Account not found' },
+        { status: 404 }
+      );
+    }
+
     // Validate category if provided
     if (data.categoryId) {
       const category = await prisma.category.findFirst({
@@ -129,13 +147,26 @@ export const POST = withRateLimit(async function (req: NextRequest) {
         type: data.type,
         amount,
         date: transactionDate,
+        accountId: data.accountId,
         categoryId: data.categoryId || null,
         merchant: data.merchant || null,
         paymentMethod: data.paymentMethod || null,
         notes: data.notes || '',
+        allocations: data.allocations ? JSON.stringify(data.allocations) : '[]',
       },
-      include: { category: true },
+      include: {
+        category: true,
+        account: true,
+      },
     });
+
+    // Update account balance
+    await updateAccountBalance(data.accountId, session.user.id);
+
+    // Process income allocations if provided
+    if (data.type === 'income' && data.allocations && Array.isArray(data.allocations)) {
+      await processIncomeAllocations(data.allocations, amount, session.user.id);
+    }
 
     return NextResponse.json({ transaction }, { status: 201 });
   } catch (error) {
@@ -147,3 +178,64 @@ export const POST = withRateLimit(async function (req: NextRequest) {
     );
   }
 });
+
+/**
+ * Helper function to process income allocations to savings categories
+ */
+async function processIncomeAllocations(
+  allocations: Array<{ categoryId: string; amount: number; isPercentage: boolean }>,
+  totalIncome: number,
+  userId: string
+) {
+  for (const allocation of allocations) {
+    if (allocation.amount <= 0) continue;
+
+    // Calculate actual amount to allocate
+    const actualAmount = allocation.isPercentage
+      ? (totalIncome * allocation.amount) / 100
+      : allocation.amount;
+
+    if (actualAmount <= 0) continue;
+
+    // Verify savings category belongs to user
+    const savingsCategory = await prisma.savingsCategory.findFirst({
+      where: {
+        id: allocation.categoryId,
+        userId,
+      },
+    });
+
+    if (!savingsCategory) {
+      console.warn(`Savings category ${allocation.categoryId} not found for user ${userId}`);
+      continue;
+    }
+
+    // Update savings category balance
+    await prisma.savingsCategory.update({
+      where: { id: allocation.categoryId },
+      data: {
+        currentBalance: {
+          increment: actualAmount,
+        },
+      },
+    });
+  }
+}
+
+/**
+ * Helper function to recalculate and update account balance
+ */
+async function updateAccountBalance(accountId: string, userId: string) {
+  const transactions = await prisma.transaction.findMany({
+    where: { accountId, userId },
+  });
+
+  const balance = transactions.reduce((acc, t) => {
+    return acc + (t.type === 'income' ? t.amount : -t.amount);
+  }, 0);
+
+  await prisma.account.update({
+    where: { id: accountId },
+    data: { currentBalance: balance },
+  });
+}

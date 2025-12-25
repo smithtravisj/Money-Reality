@@ -11,14 +11,14 @@ export const POST = withRateLimit(async function (req: NextRequest) {
     // Validation
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Please enter both email and password' },
+        { message: 'Please enter both email and password' },
         { status: 400 }
       );
     }
 
     if (password.length < 8) {
       return NextResponse.json(
-        { error: 'Password must be at least 8 characters' },
+        { message: 'Password must be at least 8 characters' },
         { status: 400 }
       );
     }
@@ -27,7 +27,7 @@ export const POST = withRateLimit(async function (req: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: 'Please enter a valid email address' },
+        { message: 'Please enter a valid email address' },
         { status: 400 }
       );
     }
@@ -39,7 +39,7 @@ export const POST = withRateLimit(async function (req: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Email already in use' },
+        { message: 'Email already in use' },
         { status: 409 }
       );
     }
@@ -80,7 +80,7 @@ export const POST = withRateLimit(async function (req: NextRequest) {
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(
-      { error: 'We couldn\'t create your account. Please try again.' },
+      { message: 'We couldn\'t create your account. Please try again.' },
       { status: 500 }
     );
   }

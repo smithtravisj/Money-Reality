@@ -5,9 +5,10 @@ export const middleware = withAuth(
   function middleware(req) {
     // Allow access to public routes without auth
     const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password'];
+    const publicApiRoutes = ['/api/user/signup', '/api/user/forgot-password', '/api/user/reset-password'];
 
     // If on public route, allow access
-    if (publicRoutes.includes(req.nextUrl.pathname)) {
+    if (publicRoutes.includes(req.nextUrl.pathname) || publicApiRoutes.includes(req.nextUrl.pathname)) {
       return NextResponse.next();
     }
 

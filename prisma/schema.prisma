@@ -19,12 +19,40 @@ model User {
 
   transactions             Transaction[]
   categories               Category[]
+  accounts                 Account[]
   weeklyCheckins           WeeklyCheckin[]
   balanceSnapshots         BalanceSnapshot[]
   settings                 Settings?
+  savingsCategories        SavingsCategory[]
   rateLimits               RateLimit[]
 
   @@index([email])
+}
+
+model Account {
+  id               String        @id @default(cuid())
+  userId           String
+  name             String
+  type             String        // 'checking', 'savings', 'credit', 'cash'
+  currentBalance   Float         @default(0)
+  notes            String        @default("")
+  colorTag         String?
+  icon             String?
+  order            Int           @default(0)
+  isDefault        Boolean       @default(false)
+  autoPayAccountId String?       // FK to another Account (checking/savings) for credit card auto-pay
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  autoPayAccount     Account?      @relation("AutoPay", fields: [autoPayAccountId], references: [id], onDelete: SetNull)
+  linkedCreditCards  Account[]     @relation("AutoPay")
+
+  @@index([userId])
+  @@index([type])
+  @@index([autoPayAccountId])
+  @@unique([userId, name])
 }
 
 model Transaction {
@@ -33,19 +61,23 @@ model Transaction {
   type          String    // 'expense' or 'income'
   amount        Float     // Stored as positive number, type indicates direction
   date          DateTime  // Full date/time of transaction
+  accountId     String    // Required - every transaction belongs to an account
   categoryId    String?   // Optional category
   merchant      String?   // Where money was spent/received
   paymentMethod String?   // Cash, Card, Transfer, etc.
   notes         String    @default("")
+  allocations   String    @default("[]") // JSON array of allocations to savings categories
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       Account   @relation(fields: [accountId], references: [id], onDelete: Restrict)
   category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([type])
   @@index([date])
+  @@index([accountId])
   @@index([categoryId])
 }
 
@@ -58,6 +90,9 @@ model Category {
   colorTag     String?       // Hex color for UI (e.g. #57ab5a)
   icon         String?       // Icon identifier (lucide icon name)
   order        Int           @default(0)
+  monthlyBudget Float?       // YNAB-style budget allocation per month (null = no budget set)
+  budgetPeriod String        @default("monthly") // Future: support 'weekly', 'yearly'
+  rolloverBalance Float      @default(0) // Accumulated unspent budget from previous months
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -114,11 +149,31 @@ model Settings {
   enableWarnings        Boolean  @default(true)
   warningThreshold      Float?   // Optional: show warnings when balance below this
   defaultPaymentMethod  String?  // Default payment method (Cash, Card, Transfer, etc.)
+  defaultAccountId      String?  // Default account for new transactions
+  totalSavings          Float    @default(0) // Total accumulated savings (kept for backwards compatibility)
+  cardCollapseStates    String   @default("{}") // JSON object with card collapse states
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+}
+
+model SavingsCategory {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String   // "Emergency Fund", "Vacation", etc.
+  description   String   @default("")
+  targetAmount  Float?   // Optional goal amount
+  currentBalance Float   @default(0) // How much is saved in this category
+  order         Int      @default(0) // For sorting
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
   @@index([userId])
 }
 

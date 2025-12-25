@@ -1,22 +1,28 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import useAppStore from '@/lib/store';
+import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import { Select } from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import EmptyState from '@/components/ui/EmptyState';
-import { Trash2 } from 'lucide-react';
+import AddTransactionModal from '@/components/AddTransactionModal';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import Button from '@/components/ui/Button';
+import { Trash2, Plus } from 'lucide-react';
 
 export default function TransactionsPage() {
-  const router = useRouter();
-  const { transactions, categories, deleteTransaction } = useAppStore();
+  const { transactions, categories, accounts, deleteTransaction } = useAppStore();
 
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterCategory, setFilterCategory] = useState('');
-  const [searchMerchant, setSearchMerchant] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'>('date-desc');
+  const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [incomeModalOpen, setIncomeModalOpen] = useState(false);
+  const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const filteredAndSorted = useMemo(() => {
     let result = [...transactions];
@@ -31,14 +37,41 @@ export default function TransactionsPage() {
       result = result.filter((t) => t.categoryId === filterCategory);
     }
 
-    // Filter by merchant/notes search
-    if (searchMerchant) {
-      const search = searchMerchant.toLowerCase();
-      result = result.filter(
-        (t) =>
-          (t.merchant?.toLowerCase().includes(search) || false) ||
-          (t.notes?.toLowerCase().includes(search) || false)
-      );
+    // Comprehensive search across all fields
+    if (searchQuery) {
+      const search = searchQuery.toLowerCase();
+      result = result.filter((t) => {
+        // Search merchant
+        if (t.merchant?.toLowerCase().includes(search)) return true;
+
+        // Search notes
+        if (t.notes?.toLowerCase().includes(search)) return true;
+
+        // Search category name
+        const category = categories.find((c) => c.id === t.categoryId);
+        if (category?.name.toLowerCase().includes(search)) return true;
+
+        // Search amount
+        if (t.amount.toString().includes(search)) return true;
+
+        // Search date (multiple formats)
+        const dateStr = new Date(t.date);
+        const dateFormatted = dateStr.toLocaleDateString();
+        const dateISO = dateStr.toISOString().split('T')[0];
+        if (dateFormatted.includes(search) || dateISO.includes(search)) return true;
+
+        // Search payment method
+        if (t.paymentMethod?.toLowerCase().includes(search)) return true;
+
+        // Search account name
+        const account = accounts.find((a) => a.id === t.accountId);
+        if (account?.name.toLowerCase().includes(search)) return true;
+
+        // Search transaction type
+        if (t.type.toLowerCase().includes(search)) return true;
+
+        return false;
+      });
     }
 
     // Sort
@@ -58,26 +91,127 @@ export default function TransactionsPage() {
     });
 
     return result;
-  }, [transactions, filterType, filterCategory, searchMerchant, sortBy]);
+  }, [transactions, filterType, filterCategory, searchQuery, sortBy]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-      try {
-        await deleteTransaction(id);
-      } catch (error) {
-        alert('Failed to delete transaction');
-      }
+  const handleDeleteTransaction = async (id: string) => {
+    setLoading(true);
+    try {
+      await deleteTransaction(id);
+      setDeletingTransactionId(null);
+    } catch (error) {
+      console.error('Failed to delete transaction:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
 
   return (
-    <div style={{ padding: 'var(--card-padding)' }} className="page-container">
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <h1 className="page-title">Transactions</h1>
-        <p className="page-subtitle">View and manage all your transactions</p>
-      </div>
+    <div>
+      <PageHeader
+        title="Transactions"
+        subtitle="View and manage all your transactions"
+        actions={
+          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--panel-2)', padding: '4px', borderRadius: 'var(--radius-control)' }}>
+              <button
+                onClick={() => setFilterType('expense')}
+                style={{
+                  padding: 'var(--space-2) var(--space-3)',
+                  borderRadius: 'var(--radius-control)',
+                  border: filterType === 'expense' ? '2px solid var(--accent)' : '1px solid transparent',
+                  backgroundColor: filterType === 'expense' ? 'var(--panel)' : 'transparent',
+                  color: filterType === 'expense' ? 'var(--text)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (filterType !== 'expense') {
+                    e.currentTarget.style.color = 'var(--text)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (filterType !== 'expense') {
+                    e.currentTarget.style.color = 'var(--text-muted)';
+                  }
+                }}
+              >
+                Expenses
+              </button>
+              <button
+                onClick={() => setFilterType('income')}
+                style={{
+                  padding: 'var(--space-2) var(--space-3)',
+                  borderRadius: 'var(--radius-control)',
+                  border: filterType === 'income' ? '2px solid var(--accent)' : '1px solid transparent',
+                  backgroundColor: filterType === 'income' ? 'var(--panel)' : 'transparent',
+                  color: filterType === 'income' ? 'var(--text)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (filterType !== 'income') {
+                    e.currentTarget.style.color = 'var(--text)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (filterType !== 'income') {
+                    e.currentTarget.style.color = 'var(--text-muted)';
+                  }
+                }}
+              >
+                Income
+              </button>
+              <button
+                onClick={() => setFilterType('all')}
+                style={{
+                  padding: 'var(--space-2) var(--space-3)',
+                  borderRadius: 'var(--radius-control)',
+                  border: filterType === 'all' ? '2px solid var(--accent)' : '1px solid transparent',
+                  backgroundColor: filterType === 'all' ? 'var(--panel)' : 'transparent',
+                  color: filterType === 'all' ? 'var(--text)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (filterType !== 'all') {
+                    e.currentTarget.style.color = 'var(--text)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (filterType !== 'all') {
+                    e.currentTarget.style.color = 'var(--text-muted)';
+                  }
+                }}
+              >
+                All
+              </button>
+            </div>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => setExpenseModalOpen(true)}
+            >
+              <Plus size={18} /> Expense
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => setIncomeModalOpen(true)}
+            >
+              <Plus size={18} /> Income
+            </Button>
+          </div>
+        }
+      />
+      <div style={{ padding: 'var(--card-padding)' }} className="page-container">
 
       {/* Filters Card */}
       <Card title="Filters" style={{ marginBottom: 'var(--space-4)' }}>
@@ -118,15 +252,15 @@ export default function TransactionsPage() {
             ]}
           />
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '4px', fontSize: 'var(--font-size-sm)', fontWeight: '500', color: 'var(--text)' }}>
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label style={{ display: 'block', marginBottom: '12px', fontSize: 'var(--font-size-sm)', fontWeight: '500', color: 'var(--text)' }}>
               Search
             </label>
             <input
               type="text"
-              value={searchMerchant}
-              onChange={(e) => setSearchMerchant(e.target.value)}
-              placeholder="Search merchant..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search transactions..."
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -147,7 +281,7 @@ export default function TransactionsPage() {
         <EmptyState
           title="No transactions found"
           description="Try adjusting your filters or add a new transaction"
-          action={{ label: 'Add Transaction', onClick: () => router.push('/add-expense') }}
+          action={{ label: 'Add Transaction', onClick: () => setExpenseModalOpen(true) }}
         />
       ) : (
         <Card>
@@ -199,7 +333,7 @@ export default function TransactionsPage() {
                       </td>
                       <td style={{ padding: 'var(--space-2)', textAlign: 'center' }}>
                         <button
-                          onClick={() => handleDelete(transaction.id)}
+                          onClick={() => setDeletingTransactionId(transaction.id)}
                           style={{
                             background: 'none',
                             border: 'none',
@@ -228,6 +362,33 @@ export default function TransactionsPage() {
           </div>
         </Card>
       )}
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingTransactionId && (
+        <ConfirmationModal
+          title="Delete Transaction"
+          message="Are you sure you want to delete this transaction? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          isDangerous={true}
+          onConfirm={() => handleDeleteTransaction(deletingTransactionId)}
+          onCancel={() => setDeletingTransactionId(null)}
+          isLoading={loading}
+        />
+      )}
+
+      {/* Transaction Modals */}
+      <AddTransactionModal
+        type="expense"
+        isOpen={expenseModalOpen}
+        onClose={() => setExpenseModalOpen(false)}
+      />
+      <AddTransactionModal
+        type="income"
+        isOpen={incomeModalOpen}
+        onClose={() => setIncomeModalOpen(false)}
+      />
     </div>
   );
 }
