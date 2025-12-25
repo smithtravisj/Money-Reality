@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   CreditCard,
+  Gift,
 } from 'lucide-react';
 
 const menuItems = [
@@ -24,6 +25,7 @@ const menuItems = [
   { name: 'Transactions', path: '/transactions', icon: List },
   { name: 'Accounts', path: '/accounts', icon: Wallet },
   { name: 'Credit Cards', path: '/credit-cards', icon: CreditCard },
+  { name: 'Gift Cards', path: '/gift-cards', icon: Gift },
   { name: 'Weekly Check-in', path: '/weekly-checkin', icon: Calendar },
   { name: 'Analytics', path: '/analytics', icon: TrendingUp },
   { name: 'Settings', path: '/settings', icon: Settings },

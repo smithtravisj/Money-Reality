@@ -278,6 +278,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
 }
 
+// Gift Card types
+export interface GiftCard {
+  id: string;
+  userId: string;
+  name: string;
+  initialBalance: number;
+  currentBalance: number;
+  type: 'digital' | 'physical';
+  expirationDate: string | null;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// UI Component props
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
