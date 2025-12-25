@@ -428,11 +428,11 @@ export default function GiftCardsPage() {
               <Card key={card.id}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', height: '100%' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', flex: 1 }}>
-                      <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-sm)', marginBottom: '2px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                      <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-md)' }}>
                         {card.name}
                       </div>
-                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                         <span>{card.type === 'digital' ? 'Digital' : 'Physical'}</span>
                         {card.expirationDate && (
                           <span>
