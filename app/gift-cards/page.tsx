@@ -7,26 +7,39 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ConfirmationModal from '@/components/ConfirmationModal';
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 
 const styles = `
-  .gift-card-edit-btn {
-    color: #999999;
-    transition: color 0.2s ease;
+  .gift-card {
+    cursor: pointer;
+    transition: all var(--transition-fast);
   }
 
-  .gift-card-edit-btn:hover {
-    color: rgba(59, 130, 246, 1);
+  .gift-card:hover {
+    background-color: var(--panel-2);
   }
 
   .gift-card-delete-btn {
-    color: #999999;
-    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--danger);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    width: 100%;
   }
 
   .gift-card-delete-btn:hover {
-    color: var(--status-danger);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--danger);
   }
 `;
 
@@ -350,6 +363,20 @@ export default function GiftCardsPage() {
                   {editingId ? 'Update' : 'Create'}
                 </Button>
               </div>
+
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeletingId(editingId);
+                    setShowAddForm(false);
+                  }}
+                  className="gift-card-delete-btn"
+                >
+                  <Trash2 size={18} />
+                  <span>Delete Card</span>
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -425,71 +452,39 @@ export default function GiftCardsPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)' }}>
             {giftCards.map((card) => (
-              <Card key={card.id}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', height: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                      <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-md)' }}>
-                        {card.name}
+              <div key={card.id} className="gift-card" onClick={() => handleEdit(card)}>
+                <Card>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', height: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                        <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-md)' }}>
+                          {card.name}
+                        </div>
+                        <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                          <span>{card.type === 'digital' ? 'Digital' : 'Physical'}</span>
+                          {card.expirationDate && (
+                            <span>
+                              {new Date(card.expirationDate).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                        <span>{card.type === 'digital' ? 'Digital' : 'Physical'}</span>
-                        {card.expirationDate && (
-                          <span>
-                            {new Date(card.expirationDate).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                        <button
-                          onClick={() => handleEdit(card)}
-                          className="gift-card-edit-btn"
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '2px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                          title="Edit"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => setDeletingId(card.id)}
-                          className="gift-card-delete-btn"
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '2px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
 
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '2px' }}>
-                        Balance
-                      </div>
-                      <div style={{ fontSize: 'var(--font-size-md)', fontWeight: '600', color: 'var(--text)', marginBottom: '2px' }}>
-                        ${formatCurrency(card.currentBalance)}
-                      </div>
-                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                        of ${formatCurrency(card.initialBalance)}
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '2px' }}>
+                          Balance
+                        </div>
+                        <div style={{ fontSize: 'var(--font-size-md)', fontWeight: '600', color: 'var(--text)', marginBottom: '2px' }}>
+                          ${formatCurrency(card.currentBalance)}
+                        </div>
+                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                          of ${formatCurrency(card.initialBalance)}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             ))}
           </div>
         )}
