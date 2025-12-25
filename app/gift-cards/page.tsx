@@ -10,6 +10,26 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import { Plus, Trash2, Edit2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 
+const styles = `
+  .gift-card-edit-btn {
+    color: #999999;
+    transition: color 0.2s ease;
+  }
+
+  .gift-card-edit-btn:hover {
+    color: rgba(59, 130, 246, 1);
+  }
+
+  .gift-card-delete-btn {
+    color: #999999;
+    transition: color 0.2s ease;
+  }
+
+  .gift-card-delete-btn:hover {
+    color: var(--status-danger);
+  }
+`;
+
 interface GiftCardFormData {
   name: string;
   initialBalance: string;
@@ -162,6 +182,7 @@ export default function GiftCardsPage() {
 
   return (
     <div>
+      <style>{styles}</style>
       <PageHeader
         title="Gift Cards"
         subtitle="Track your gift cards and remaining balances"
@@ -407,17 +428,51 @@ export default function GiftCardsPage() {
               <Card key={card.id}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', height: '100%' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-                    <div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', flex: 1 }}>
                       <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: 'var(--font-size-sm)', marginBottom: '2px' }}>
                         {card.name}
                       </div>
-                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                      <div style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
                         <span>{card.type === 'digital' ? 'Digital' : 'Physical'}</span>
                         {card.expirationDate && (
                           <span>
                             {new Date(card.expirationDate).toLocaleDateString()}
                           </span>
                         )}
+                      </div>
+                      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                        <button
+                          onClick={() => handleEdit(card)}
+                          className="gift-card-edit-btn"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          title="Edit"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => setDeletingId(card.id)}
+                          className="gift-card-delete-btn"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
 
@@ -432,41 +487,6 @@ export default function GiftCardsPage() {
                         of ${formatCurrency(card.initialBalance)}
                       </div>
                     </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 'var(--space-2)', justifyContent: 'flex-start', marginTop: 'auto' }}>
-                    <button
-                      onClick={() => handleEdit(card)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'rgba(59, 130, 246, 0.6)',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      title="Edit"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => setDeletingId(card.id)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--status-danger)',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
                 </div>
               </Card>
