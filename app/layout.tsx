@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: 'Money Reality',
   description: 'Your personal budget tracker - honest financial truth',
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.png',
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
