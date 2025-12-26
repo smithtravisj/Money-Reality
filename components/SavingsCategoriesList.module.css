@@ -1,0 +1,81 @@
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .summarySection {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: var(--space-3);
+  }
+
+  .summaryItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .summaryLabel {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 0 !important;
+  }
+
+  .summaryValue {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .addButton {
+    padding: 6px 10px !important;
+    font-size: 12px;
+  }
+
+  .categoriesList {
+    gap: 8px;
+  }
+
+  .categoryItem {
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .categoryName {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px !important;
+  }
+
+  .categoryDescription {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 2px !important;
+  }
+
+  .categoryGoal {
+    margin-top: 6px !important;
+  }
+
+  .categoryGoalLabel {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 2px !important;
+  }
+
+  .categoryBalance {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .categoryBalanceAmount {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .categoryActions {
+    display: none;
+  }
+
+  .deleteButton {
+    padding: 3px !important;
+  }
+}

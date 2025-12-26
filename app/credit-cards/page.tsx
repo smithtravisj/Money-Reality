@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button';
 import CreditCardList from '@/components/CreditCardList';
 import { getCreditCardsSummary } from '@/lib/creditCardCalculations';
 import { CreditCardSummary } from '@/types';
+import styles from './page.module.css';
 
 export default function CreditCardsPage() {
   const router = useRouter();
@@ -34,13 +35,13 @@ export default function CreditCardsPage() {
   };
 
   return (
-    <div>
+    <div className={styles.pageWrapper}>
       <PageHeader
         title="Credit Cards"
         subtitle="Track your monthly credit card spending"
         actions={
-          <Button variant="primary" size="md" onClick={handleAddCard}>
-            + Add Credit Card
+          <Button variant="primary" size="md" onClick={handleAddCard} className={styles.addButton}>
+            <span className={styles.buttonLabel}>+ Add Credit Card</span>
           </Button>
         }
       />

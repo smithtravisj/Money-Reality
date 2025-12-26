@@ -46,7 +46,7 @@ export default function CollapsibleCard({
   };
 
   return (
-    <div className={`${styles.card} ${hoverable ? styles.hoverable : ''} ${className}`} style={style}>
+    <div className={`${styles.card} ${hoverable ? styles.hoverable : ''} ${isCollapsed ? styles.collapsed : ''} ${className}`} style={style}>
       {title && (
         <div className={styles.header} style={{ cursor: 'pointer' }} onClick={handleToggleCollapse}>
           <div className={styles.headerContent}>

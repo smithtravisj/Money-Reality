@@ -1,0 +1,161 @@
+.pageContainer {
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--grid-gap);
+  margin-bottom: var(--space-4);
+}
+
+.metricCard {
+  text-align: center;
+}
+
+.metricLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.metricValue {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.monthlySummaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.summaryValue {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.pastMonthLabel {
+  margin-bottom: 0px;
+  margin-top: -16px;
+}
+
+.overallUsageLabel {
+  margin-top: -24px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .pageWrapper :global([class*="container"]) {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .pageWrapper :global([class*="content"]) {
+    flex: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .pageWrapper :global([class*="actions"]) {
+    width: auto !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .exportButton {
+    padding: 6px 8px !important;
+    font-size: 0 !important;
+    min-width: auto !important;
+  }
+
+  .buttonLabel {
+    display: none;
+  }
+
+  .pageContainer {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .metricsGrid {
+    gap: 8px;
+    margin-bottom: var(--space-3);
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metricLabel {
+    font-size: var(--font-size-xs);
+    margin-bottom: 4px;
+  }
+
+  .metricValue {
+    font-size: var(--font-size-2xl);
+  }
+
+  .monthlySummaryGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .summaryLabel {
+    font-size: var(--font-size-2xs);
+    margin-bottom: 2px;
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-base);
+  }
+
+  .currentMonthCard {
+    margin-top: -16px !important;
+  }
+
+  .pastMonthCard {
+    margin-top: -24px !important;
+  }
+
+  .allTimeCard {
+    margin-top: -24px !important;
+  }
+
+  .topSpendingCard {
+    margin-top: -24px !important;
+  }
+
+  .accountBreakdownCard {
+    margin-top: -24px !important;
+  }
+
+  .budgetVsActualCard {
+    margin-top: -24px !important;
+  }
+
+  .accountBreakdownCard :global([style*="grid"]) {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .pastMonthLabel {
+    margin-top: -12px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .overallUsageLabel {
+    margin-top: -12px !important;
+  }
+}

@@ -1,0 +1,130 @@
+/* Desktop styles */
+.cardBalance {
+  display: flex;
+  flex-direction: column;
+}
+
+.balanceRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.balanceLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.balanceAmount {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.initialBalance {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .pageWrapper :global([class*="container"]) {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .pageWrapper :global([class*="content"]) {
+    flex: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .pageWrapper :global([class*="actions"]) {
+    width: auto !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .addButton {
+    padding: 6px 8px !important;
+    font-size: 0 !important;
+    min-width: auto !important;
+  }
+
+  .buttonLabel {
+    display: none;
+  }
+
+  .giftCardsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .balanceRow {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: var(--space-1) !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
+  }
+
+  .balanceLabel {
+    font-size: var(--font-size-md) !important;
+    color: var(--text) !important;
+    font-weight: 600 !important;
+  }
+
+  /* Modal styling - mobile only */
+  .giftCardModalOverlay {
+    align-items: center !important;
+  }
+
+  .giftCardModal {
+    padding: 12px !important;
+    max-width: 100% !important;
+    margin: 0 12px 12px 12px !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+  }
+
+  .giftCardModal h3 {
+    margin-bottom: 12px !important;
+    margin-top: 0 !important;
+    font-size: 16px !important;
+    line-height: 1.1 !important;
+  }
+
+  .giftCardModal form {
+    gap: 12px !important;
+  }
+
+  .giftCardModal form > div {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .giftCardModal label {
+    margin-bottom: 6px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    display: block !important;
+  }
+
+  .giftCardModal input,
+  .giftCardModal select {
+    height: 28px !important;
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .giftCardModal button {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+    height: 28px !important;
+    line-height: 1 !important;
+  }
+
+}

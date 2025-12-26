@@ -1,0 +1,6 @@
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .settingsGrid {
+    grid-template-columns: 1fr !important;
+  }
+}

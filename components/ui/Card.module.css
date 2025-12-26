@@ -63,15 +63,25 @@
   gap: var(--space-3);
 }
 
+.collapsed {
+  padding-bottom: 0 !important;
+}
+
+.collapsed .header {
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
 /* Mobile overrides */
 @media (max-width: 767px) {
   .card {
-    padding: 16px;
+    padding: 12px;
     border-radius: 10px;
+    gap: var(--space-2);
   }
 
   .header {
-    padding-bottom: var(--space-2);
+    padding-bottom: 6px;
     gap: var(--space-2);
   }
 
@@ -84,6 +94,6 @@
   }
 
   .content {
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
 }

@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
+import pageStyles from './page.module.css';
 
 const styles = `
   .gift-card {
@@ -194,7 +195,7 @@ export default function GiftCardsPage() {
   const totalSpent = giftCards.reduce((sum, card) => sum + (card.initialBalance - card.currentBalance), 0);
 
   return (
-    <div>
+    <div className={pageStyles.pageWrapper}>
       <style>{styles}</style>
       <PageHeader
         title="Gift Cards"
@@ -212,8 +213,9 @@ export default function GiftCardsPage() {
             });
             setFormErrors({});
             setShowAddForm(true);
-          }}>
-            <Plus size={18} /> Add Card
+          }} className={pageStyles.addButton}>
+            <Plus size={18} />
+            <span className={pageStyles.buttonLabel}>Add Card</span>
           </Button>
         }
       />
@@ -221,6 +223,7 @@ export default function GiftCardsPage() {
       {/* Add/Edit Card Modal */}
       {showAddForm && (
         <div
+          className={pageStyles.giftCardModalOverlay}
           style={{
             position: 'fixed',
             top: 0,
@@ -237,6 +240,7 @@ export default function GiftCardsPage() {
           onClick={() => setShowAddForm(false)}
         >
           <div
+            className={pageStyles.giftCardModal}
             style={{
               width: '100%',
               maxWidth: '500px',
@@ -450,7 +454,7 @@ export default function GiftCardsPage() {
             </div>
           </Card>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)' }} className={pageStyles.giftCardsGrid}>
             {giftCards.map((card) => (
               <div key={card.id} className="gift-card" onClick={() => handleEdit(card)}>
                 <Card>
@@ -470,14 +474,16 @@ export default function GiftCardsPage() {
                         </div>
                       </div>
 
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '2px' }}>
-                          Balance
+                      <div style={{ textAlign: 'right' }} className={pageStyles.cardBalance}>
+                        <div className={pageStyles.balanceRow}>
+                          <span className={pageStyles.balanceLabel}>
+                            Balance:
+                          </span>
+                          <span className={pageStyles.balanceAmount}>
+                            ${formatCurrency(card.currentBalance)}
+                          </span>
                         </div>
-                        <div style={{ fontSize: 'var(--font-size-md)', fontWeight: '600', color: 'var(--text)', marginBottom: '2px' }}>
-                          ${formatCurrency(card.currentBalance)}
-                        </div>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                        <div className={pageStyles.initialBalance}>
                           of ${formatCurrency(card.initialBalance)}
                         </div>
                       </div>

@@ -1,0 +1,193 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--card-padding);
+}
+
+.collapsibleSection {
+  margin-top: var(--space-4);
+}
+
+.allocationSummary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  background-color: var(--panel-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  margin-bottom: var(--space-4);
+}
+
+.allocationItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  text-align: center;
+}
+
+.allocationLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.allocationValue {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.categoryGroupsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.categoryGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.groupTitle {
+  color: var(--text);
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-base);
+}
+
+.groupItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.categoryItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2);
+  background-color: var(--panel-2);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.categoryItem:hover {
+  background-color: var(--panel);
+}
+
+.categoryName {
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.rolloverInfo {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.categoryBudget {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .pageWrapper :global([class*="container"]) {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .pageWrapper :global([class*="content"]) {
+    flex: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .pageWrapper :global([class*="actions"]) {
+    width: auto !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .addCategoryButton {
+    padding: 6px 8px !important;
+    font-size: 0 !important;
+  }
+
+  .buttonLabel {
+    display: none;
+  }
+
+  .addCategoryButton svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .pageContainer {
+    gap: 0;
+    padding: var(--space-3);
+  }
+
+  .collapsibleSection {
+    margin-top: var(--space-3);
+  }
+
+  .allocationSummary {
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: var(--space-3);
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .allocationItem {
+    gap: 3px;
+  }
+
+  .allocationLabel {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .allocationValue {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .categoryGroupsContainer {
+    gap: var(--space-3);
+  }
+
+  .groupTitle {
+    margin-bottom: 8px;
+    font-size: var(--font-size-sm);
+  }
+
+  .groupItems {
+    gap: 8px;
+  }
+
+  .categoryItem {
+    gap: var(--space-2);
+    padding: 8px;
+  }
+
+  .categoryName {
+    margin-bottom: 2px;
+    font-size: var(--font-size-xs);
+  }
+
+  .rolloverInfo {
+    font-size: var(--font-size-2xs);
+  }
+
+  .categoryBudget {
+    font-size: var(--font-size-base);
+  }
+}

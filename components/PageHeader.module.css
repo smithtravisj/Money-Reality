@@ -47,7 +47,17 @@
 /* Mobile adjustments */
 @media (max-width: 767px) {
   .header {
-    padding: 10px 14px;
+    padding: 8px 12px;
+  }
+
+  .container {
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .content {
+    width: 100%;
   }
 
   .title {
@@ -56,9 +66,22 @@
 
   .subtitle {
     font-size: var(--font-size-xs);
+    margin: 2px 0 0 0;
   }
 
   .actions {
     gap: 6px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .actions button {
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+  }
+
+  .actions svg {
+    width: 14px !important;
+    height: 14px !important;
   }
 }

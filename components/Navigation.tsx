@@ -77,10 +77,19 @@ export default function Navigation() {
                   );
                 })}
               </div>
-              <button onClick={handleSignOut} className={styles.signOutButton}>
-                <LogOut size={18} />
-                <span>Sign Out</span>
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginTop: 'auto' }}>
+                <button
+                  onClick={() => handleNavigation('/profile')}
+                  className={styles.profileButton}
+                >
+                  <User size={18} />
+                  <span>Profile</span>
+                </button>
+                <button onClick={handleSignOut} className={styles.signOutButton}>
+                  <LogOut size={18} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </nav>
           </div>
         )}

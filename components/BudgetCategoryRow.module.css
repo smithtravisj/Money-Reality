@@ -1,6 +1,6 @@
 .row {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 0.5fr;
+  grid-template-columns: 0.8fr 2fr;
   gap: var(--space-3);
   align-items: center;
   padding: var(--space-2) 0;
@@ -19,7 +19,7 @@
 }
 
 .categoryName {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--text);
   margin: 0;
@@ -28,15 +28,19 @@
 
 .budgetInfo {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  flex-direction: row;
+  gap: 12px;
+  align-items: center;
 }
 
 .amounts {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: var(--font-size-xs);
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .spent {
@@ -56,6 +60,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  flex: 1;
 }
 
 .progressBar {
@@ -73,7 +78,7 @@
 }
 
 .percentage {
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   min-width: 35px;
   text-align: right;
@@ -81,6 +86,7 @@
 
 .available {
   text-align: right;
+  display: none;
 }
 
 .available span {
@@ -121,17 +127,47 @@
 /* Mobile adjustments */
 @media (max-width: 767px) {
   .row {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 6px;
+    padding: 8px 0;
+  }
+
+  .categoryInfo {
+    gap: var(--space-1);
   }
 
   .categoryName {
     font-size: var(--font-size-xs);
   }
 
+  .budgetInfo {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+  }
+
   .amounts {
     font-size: var(--font-size-2xs);
+    white-space: nowrap;
+  }
+
+  .progressContainer {
+    display: none;
+  }
+
+  .progressBar {
+    display: none;
+  }
+
+  .percentage {
+    font-size: var(--font-size-2xs);
+    min-width: auto;
+  }
+
+  .available {
+    text-align: right;
+    white-space: nowrap;
   }
 
   .available span {

@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import SavingsCategoryEditModal from '@/components/SavingsCategoryEditModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { Plus, Trash2 } from 'lucide-react';
+import styles from './SavingsCategoriesList.module.css';
 
 interface SavingsCategoriesListProps {
   categories: SavingsCategory[];
@@ -93,20 +94,20 @@ export default function SavingsCategoriesList({
         gridTemplateColumns: '1fr 1fr auto',
         gap: 'var(--space-3)',
         alignItems: 'center',
-      }}>
-        <div>
-          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+      }} className={styles.summarySection}>
+        <div className={styles.summaryItem}>
+          <div className={styles.summaryLabel}>
             Unallocated Budget
           </div>
-          <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: unallocatedBudget >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+          <div className={styles.summaryValue} style={{ color: unallocatedBudget >= 0 ? 'var(--success)' : 'var(--danger)' }}>
             ${unallocatedBudget.toFixed(2)}
           </div>
         </div>
-        <div>
-          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+        <div className={styles.summaryItem}>
+          <div className={styles.summaryLabel}>
             Total Saved
           </div>
-          <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: 'var(--text)' }}>
+          <div className={styles.summaryValue}>
             ${totalSavings.toFixed(2)}
           </div>
         </div>
@@ -114,6 +115,7 @@ export default function SavingsCategoriesList({
           variant="primary"
           size="sm"
           onClick={() => setShowAddForm(true)}
+          className={styles.addButton}
         >
           <Plus size={16} />
         </Button>
@@ -226,7 +228,7 @@ export default function SavingsCategoriesList({
           <p>No savings categories yet. Create one to get started!</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }} className={styles.categoriesList}>
           {categories.map((category) => (
             <div
               key={category.id}
@@ -242,6 +244,7 @@ export default function SavingsCategoriesList({
                 cursor: 'pointer',
                 transition: 'background-color 0.2s ease',
               }}
+              className={styles.categoryItem}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--panel)';
               }}
@@ -250,17 +253,17 @@ export default function SavingsCategoriesList({
               }}
             >
               <div>
-                <div style={{ fontWeight: '500', color: 'var(--text)', marginBottom: '4px' }}>
+                <div className={styles.categoryName}>
                   {category.name}
                 </div>
                 {category.description && (
-                  <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                  <div className={styles.categoryDescription}>
                     {category.description}
                   </div>
                 )}
                 {category.targetAmount && (
-                  <div style={{ marginTop: 'var(--space-2)' }}>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                  <div className={styles.categoryGoal}>
+                    <div className={styles.categoryGoalLabel}>
                       Goal: ${category.targetAmount.toFixed(2)}
                       {category.targetAmount > 0 && (
                         <span> ({((category.currentBalance / category.targetAmount) * 100).toFixed(0)}%)</span>
@@ -295,18 +298,19 @@ export default function SavingsCategoriesList({
                 )}
               </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: 'var(--text)' }}>
+              <div className={styles.categoryBalance}>
+                <div className={styles.categoryBalanceAmount}>
                   ${category.currentBalance.toFixed(2)}
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+              <div className={styles.categoryActions}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setDeletingId(category.id);
                   }}
+                  className={styles.deleteButton}
                   style={{
                     background: 'none',
                     border: 'none',

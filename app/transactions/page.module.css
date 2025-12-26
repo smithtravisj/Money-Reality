@@ -1,0 +1,245 @@
+.headerActions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.filterButtonGroup {
+  display: flex;
+  gap: 4px;
+  background-color: var(--panel-2);
+  padding: 4px;
+  border-radius: var(--radius-control);
+}
+
+.filterButton {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filterButton.active {
+  border: 2px solid var(--accent);
+  background-color: var(--panel);
+  color: var(--text);
+}
+
+.pageContainer {
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.filterCard {
+  margin-bottom: 4px;
+}
+
+.toggleButton {
+  display: none !important;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.transactionsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.tableHeader {
+  border-bottom: 2px solid var(--border);
+}
+
+.tableHeaderCell {
+  padding: var(--space-2);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.tableHeaderCell.right {
+  text-align: right;
+}
+
+.tableHeaderCell.center {
+  text-align: center;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--border);
+}
+
+.tableCell {
+  padding: var(--space-2);
+  color: var(--text);
+}
+
+.tableCell.right {
+  text-align: right;
+  font-weight: 600;
+}
+
+.tableCell.center {
+  text-align: center;
+}
+
+.transactionAmount {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.transactionAmount.income {
+  color: var(--status-safe);
+}
+
+.transactionMerchant {
+  color: var(--text);
+}
+
+.transactionNotes {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: var(--status-danger);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all var(--transition-fast);
+}
+
+.deleteButton:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.transactionCount {
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  background-color: var(--panel-2);
+  border-radius: var(--radius-control);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .headerActions {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filterButtonGroup {
+    gap: 2px;
+    padding: 3px;
+    order: -1;
+    width: 100%;
+  }
+
+  .filterButton {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    flex: 1;
+  }
+
+  .pageContainer {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .filterCard {
+    margin-bottom: 0;
+  }
+
+  .toggleButton {
+    display: flex !important;
+  }
+
+  .filterGrid {
+    display: none !important;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .filterGrid.open {
+    display: grid !important;
+  }
+
+  .collapsed {
+    padding-bottom: 0 !important;
+  }
+
+  .collapsed > div:first-of-type {
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+  }
+
+  .filterGrid > div,
+  .filterGrid > label {
+    margin-bottom: 0 !important;
+  }
+
+  .filterGrid label {
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .filterGrid input,
+  .filterGrid select {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    height: 32px !important;
+  }
+
+  .transactionsTable {
+    font-size: var(--font-size-xs);
+    width: 100%;
+  }
+
+  .tableHeaderCell {
+    padding: 6px var(--space-1);
+    font-size: var(--font-size-2xs);
+  }
+
+  .tableHeaderCell:nth-child(3) {
+    display: none;
+  }
+
+  .tableCell {
+    padding: 6px var(--space-1);
+  }
+
+  .tableCell:nth-child(3) {
+    display: none;
+  }
+
+  .transactionNotes {
+    font-size: var(--font-size-2xs);
+    margin-top: 2px;
+  }
+
+  .transactionAmount {
+    font-size: var(--font-size-xs);
+  }
+
+  .deleteButton {
+    padding: 2px 4px;
+  }
+}

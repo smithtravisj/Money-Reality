@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input, { Select } from '@/components/ui/Input';
 import AccountList from '@/components/AccountList';
+import styles from './page.module.css';
 
 const ACCOUNT_TYPES = [
   { value: 'checking', label: 'Checking Account' },
@@ -119,7 +120,7 @@ export default function AccountsPage() {
   ];
 
   return (
-    <div>
+    <div className={styles.pageWrapper}>
       <PageHeader
         title="Accounts"
         subtitle="Manage your accounts"
@@ -127,8 +128,11 @@ export default function AccountsPage() {
           <Button
             variant={showForm ? 'secondary' : 'primary'}
             onClick={() => setShowForm(!showForm)}
+            className={styles.addButton}
           >
-            {showForm ? 'Cancel' : '+ Add Account'}
+            <span className={styles.buttonLabel}>
+              {showForm ? 'Cancel' : '+ Add Account'}
+            </span>
           </Button>
         }
       />

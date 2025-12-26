@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input, { Select } from '@/components/ui/Input';
+import styles from './page.module.css';
 
 const PAYMENT_METHODS = [
   { value: '', label: 'None (default)' },
@@ -163,7 +164,7 @@ export default function SettingsPage() {
             {message}
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-4)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-4)' }} className={styles.settingsGrid}>
 
       <Card title="Financial Thresholds">
         <form onSubmit={handleThresholdsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>

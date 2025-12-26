@@ -11,6 +11,7 @@ import BudgetOverview from '@/components/BudgetOverview';
 import CategoryEditModal from '@/components/CategoryEditModal';
 import SavingsCategoriesList from '@/components/SavingsCategoriesList';
 import { Plus } from 'lucide-react';
+import styles from './page.module.css';
 
 export default function BudgetPage() {
   const {
@@ -110,13 +111,19 @@ export default function BudgetPage() {
   };
 
   return (
-    <div>
+    <div className={styles.pageWrapper}>
       <PageHeader
         title="Budget"
         subtitle="Track your monthly spending against your budgets"
         actions={
-          <Button variant="primary" size="md" onClick={() => setShowAddForm(true)}>
-            <Plus size={18} /> Add Category
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowAddForm(true)}
+            className={styles.addCategoryButton}
+          >
+            <Plus size={18} />
+            <span className={styles.buttonLabel}>Add Category</span>
           </Button>
         }
       />
@@ -222,44 +229,36 @@ export default function BudgetPage() {
           </div>
         </div>
       )}
-      <div style={{ padding: 'var(--card-padding)' }} className="page-container">
+      <div className={styles.pageContainer}>
         <CollapsibleCard cardId="budget-overview" title="Budget Overview">
           <BudgetOverview />
         </CollapsibleCard>
 
         {/* Set Budgets Section */}
-        <CollapsibleCard cardId="set-category-budgets" title="Set Category Budgets" style={{ marginTop: 'var(--space-4)' }}>
+        <CollapsibleCard cardId="set-category-budgets" title="Set Category Budgets" className={styles.collapsibleSection}>
           {/* Allocation Summary */}
-          <div style={{
-            backgroundColor: 'var(--panel-2)',
-            padding: 'var(--space-3)',
-            borderRadius: 'var(--radius-control)',
-            marginBottom: 'var(--space-4)',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'var(--space-3)',
-          }}>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+          <div className={styles.allocationSummary}>
+            <div className={styles.allocationItem}>
+              <div className={styles.allocationLabel}>
                 Total Balance
               </div>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: 'var(--text)' }}>
+              <div className={styles.allocationValue}>
                 ${formatCurrency(totalAccountBalance)}
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+            <div className={styles.allocationItem}>
+              <div className={styles.allocationLabel}>
                 Budgeted
               </div>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: 'var(--text)' }}>
+              <div className={styles.allocationValue}>
                 ${formatCurrency(totalBudgeted)}
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+            <div className={styles.allocationItem}>
+              <div className={styles.allocationLabel}>
                 Left to Allocate
               </div>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: moneyLeftToAllocate >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+              <div className={styles.allocationValue} style={{ color: moneyLeftToAllocate >= 0 ? 'var(--success)' : 'var(--danger)' }}>
                 ${formatCurrency(moneyLeftToAllocate)}
               </div>
             </div>
@@ -270,7 +269,7 @@ export default function BudgetPage() {
               No expense categories yet. Create some in the Categories page first.
             </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <div className={styles.categoryGroupsContainer}>
               {Array.from(
                 new Map(
                   expenseCategories
@@ -280,42 +279,26 @@ export default function BudgetPage() {
               ).map(([group, _]) => {
                 const categoriesInGroup = expenseCategories.filter((c) => (c.parentGroup || '') === group);
                 return (
-                  <div key={group}>
-                    <h4 style={{ color: 'var(--text)', marginTop: 0, marginBottom: 'var(--space-2)', fontSize: 'var(--font-size-base)' }}>
+                  <div key={group} className={styles.categoryGroup}>
+                    <h4 className={styles.groupTitle}>
                       {group}
                     </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                    <div className={styles.groupItems}>
                       {categoriesInGroup.map((category) => (
                 <div
                   key={category.id}
                   onClick={() => setEditingCategoryId(category.id)}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    gap: 'var(--space-3)',
-                    alignItems: 'center',
-                    padding: 'var(--space-2)',
-                    backgroundColor: 'var(--panel-2)',
-                    borderRadius: 'var(--radius-control)',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--panel)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--panel-2)';
-                  }}
+                  className={styles.categoryItem}
                 >
                   <div>
-                    <div style={{ fontWeight: '500', color: 'var(--text)', marginBottom: '4px' }}>
+                    <div className={styles.categoryName}>
                       {category.name}
                     </div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                    <div className={styles.rolloverInfo}>
                       Rollover: ${formatCurrency(category.rolloverBalance ?? 0)}
                     </div>
                   </div>
-                  <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className={styles.categoryBudget}>
                     ${formatCurrency(category.monthlyBudget ?? 0)}
                   </div>
                 </div>
@@ -329,7 +312,7 @@ export default function BudgetPage() {
         </CollapsibleCard>
 
         {/* Savings Categories Section */}
-        <CollapsibleCard cardId="savings" title="Savings Categories" style={{ marginTop: 'var(--space-4)' }}>
+        <CollapsibleCard cardId="savings" title="Savings Categories" className={styles.collapsibleSection}>
           <SavingsCategoriesList
             categories={savingsCategories}
             unallocatedBudget={moneyLeftToAllocate}

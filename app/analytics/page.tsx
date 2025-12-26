@@ -15,6 +15,7 @@ import {
   calculateBudgetSummary,
 } from '@/lib/balanceCalculations';
 import { Download, ChevronDown } from 'lucide-react';
+import styles from './page.module.css';
 
 export default function AnalyticsPage() {
   const { transactions, categories, accounts } = useAppStore();
@@ -118,59 +119,59 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div>
+    <div className={styles.pageWrapper}>
       <PageHeader
         title="Analytics"
         subtitle="Your financial overview and statistics"
         actions={
-          <Button variant="secondary" size="md" onClick={handleExport}>
-            <Download size={18} /> Export CSV
+          <Button variant="secondary" size="md" onClick={handleExport} className={styles.exportButton}>
+            <Download size={18} /> <span className={styles.buttonLabel}>Export CSV</span>
           </Button>
         }
       />
-      <div style={{ padding: 'var(--card-padding)' }} className="page-container">
+      <div className={styles.pageContainer}>
 
       {/* Key Metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--grid-gap)', marginBottom: 'var(--space-4)' }}>
+      <div className={styles.metricsGrid}>
         <Card>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '8px' }}>
+          <div className={styles.metricCard}>
+            <div className={styles.metricLabel}>
               Current Balance
             </div>
-            <div style={{ fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--text)' }}>
+            <div className={styles.metricValue}>
               ${analytics.currentBalance.toFixed(2)}
             </div>
           </div>
         </Card>
 
         <Card>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '8px' }}>
+          <div className={styles.metricCard}>
+            <div className={styles.metricLabel}>
               Avg Daily Spending (30d)
             </div>
-            <div style={{ fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--status-danger)' }}>
+            <div className={styles.metricValue} style={{ color: 'var(--status-danger)' }}>
               ${analytics.avgDailySpending.toFixed(2)}
             </div>
           </div>
         </Card>
 
         <Card>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '8px' }}>
+          <div className={styles.metricCard}>
+            <div className={styles.metricLabel}>
               Avg Daily Income (30d)
             </div>
-            <div style={{ fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--status-safe)' }}>
+            <div className={styles.metricValue} style={{ color: 'var(--status-safe)' }}>
               ${analytics.avgDailyIncome.toFixed(2)}
             </div>
           </div>
         </Card>
 
         <Card>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '8px' }}>
+          <div className={styles.metricCard}>
+            <div className={styles.metricLabel}>
               Total Transactions
             </div>
-            <div style={{ fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--text)' }}>
+            <div className={styles.metricValue}>
               {analytics.transactionCount}
             </div>
           </div>
@@ -181,28 +182,28 @@ export default function AnalyticsPage() {
       <Card
         title={`Current Month • ${analytics.monthData.daysPassed}/${analytics.monthData.days} days`}
         style={{ marginBottom: 'var(--space-4)' }}
+        className={styles.currentMonthCard}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)' }}>
-          <div>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>Income</div>
-            <div style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--status-safe)' }}>
+        <div className={styles.monthlySummaryGrid}>
+          <div className={styles.summaryItem}>
+            <div className={styles.summaryLabel}>Income</div>
+            <div className={styles.summaryValue} style={{ color: 'var(--status-safe)' }}>
               ${analytics.monthData.income.toFixed(2)}
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>Expenses</div>
-            <div style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--status-danger)' }}>
+          <div className={styles.summaryItem}>
+            <div className={styles.summaryLabel}>Expenses</div>
+            <div className={styles.summaryValue} style={{ color: 'var(--status-danger)' }}>
               ${analytics.monthData.expenses.toFixed(2)}
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>Net</div>
+          <div className={styles.summaryItem}>
+            <div className={styles.summaryLabel}>Net</div>
             <div
+              className={styles.summaryValue}
               style={{
-                fontSize: 'var(--font-size-2xl)',
-                fontWeight: '700',
                 color: analytics.monthData.net >= 0 ? 'var(--status-safe)' : 'var(--status-danger)',
               }}
             >
@@ -213,7 +214,7 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* Past Month Summary */}
-      <div style={{ position: 'relative', marginBottom: 'var(--space-4)' }}>
+      <div style={{ position: 'relative', marginBottom: 'var(--space-4)' }} className={styles.pastMonthCard}>
         <Card style={{ marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-3)', paddingBottom: 'var(--space-3)', borderBottom: '1px solid var(--border)' }}>
             <div style={{ position: 'relative' }} ref={dropdownRef}>
@@ -303,21 +304,21 @@ export default function AnalyticsPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)' }}>
             <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>Income</div>
+              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }} className={styles.pastMonthLabel}>Income</div>
               <div style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--status-safe)' }}>
                 ${analytics.selectedMonthIncome.toFixed(2)}
               </div>
             </div>
 
             <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>Expenses</div>
+              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }} className={styles.pastMonthLabel}>Expenses</div>
               <div style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--status-danger)' }}>
                 ${analytics.selectedMonthExpenses.toFixed(2)}
               </div>
             </div>
 
             <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>Net</div>
+              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }} className={styles.pastMonthLabel}>Net</div>
               <div
                 style={{
                   fontSize: 'var(--font-size-2xl)',
@@ -333,7 +334,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* All-Time Statistics */}
-      <Card title="All-Time Statistics" style={{ marginBottom: 'var(--space-4)' }}>
+      <Card title="All-Time Statistics" style={{ marginBottom: 'var(--space-4)' }} className={styles.allTimeCard}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)' }}>
           <div>
             <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>
@@ -372,7 +373,7 @@ export default function AnalyticsPage() {
 
       {/* Top Spending Categories */}
       {analytics.breakdown.length > 0 && (
-        <Card title="Top Spending Categories" style={{ marginBottom: 'var(--space-4)' }}>
+        <Card title="Top Spending Categories" style={{ marginBottom: 'var(--space-4)' }} className={styles.topSpendingCard}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
             {analytics.breakdown.slice(0, 5).map((item) => (
               <div key={item.categoryId || 'uncategorized'}>
@@ -414,7 +415,7 @@ export default function AnalyticsPage() {
 
       {/* Account Breakdown */}
       {analytics.accountBalances.length > 0 && (
-        <Card title="Account Breakdown" style={{ marginBottom: 'var(--space-4)' }}>
+        <Card title="Account Breakdown" style={{ marginBottom: 'var(--space-4)' }} className={styles.accountBreakdownCard}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-3)' }}>
             {analytics.accountBalances.map((account) => (
               <div
@@ -447,7 +448,7 @@ export default function AnalyticsPage() {
 
       {/* Budget vs Actual */}
       {analytics.budgetSummary.categories.length > 0 && (
-        <Card title="Budget vs Actual (Current Month)" style={{ marginBottom: 'var(--space-4)' }}>
+        <Card title="Budget vs Actual (Current Month)" style={{ marginBottom: 'var(--space-4)' }} className={styles.budgetVsActualCard}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
             <div>
               <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '4px' }}>
@@ -484,7 +485,7 @@ export default function AnalyticsPage() {
           </div>
 
           <div style={{ marginBottom: 'var(--space-3)' }}>
-            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '8px' }}>
+            <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: '8px' }} className={styles.overallUsageLabel}>
               Overall Usage: {Math.round(analytics.budgetSummary.overallPercentUsed)}%
             </div>
             <div

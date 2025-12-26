@@ -10,7 +10,8 @@ import EmptyState from '@/components/ui/EmptyState';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Button from '@/components/ui/Button';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import styles from './page.module.css';
 
 export default function TransactionsPage() {
   const { transactions, categories, accounts, deleteTransaction } = useAppStore();
@@ -23,6 +24,7 @@ export default function TransactionsPage() {
   const [incomeModalOpen, setIncomeModalOpen] = useState(false);
   const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const filteredAndSorted = useMemo(() => {
     let result = [...transactions];
@@ -113,10 +115,11 @@ export default function TransactionsPage() {
         title="Transactions"
         subtitle="View and manage all your transactions"
         actions={
-          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--panel-2)', padding: '4px', borderRadius: 'var(--radius-control)' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }} className={styles.headerActions}>
+            <div className={styles.filterButtonGroup} style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--panel-2)', padding: '4px', borderRadius: 'var(--radius-control)' }}>
               <button
                 onClick={() => setFilterType('expense')}
+                className={`${styles.filterButton} ${filterType === 'expense' ? styles.active : ''}`}
                 style={{
                   padding: 'var(--space-2) var(--space-3)',
                   borderRadius: 'var(--radius-control)',
@@ -128,21 +131,12 @@ export default function TransactionsPage() {
                   fontWeight: '500',
                   transition: 'all 0.2s ease',
                 }}
-                onMouseEnter={(e) => {
-                  if (filterType !== 'expense') {
-                    e.currentTarget.style.color = 'var(--text)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filterType !== 'expense') {
-                    e.currentTarget.style.color = 'var(--text-muted)';
-                  }
-                }}
               >
                 Expenses
               </button>
               <button
                 onClick={() => setFilterType('income')}
+                className={`${styles.filterButton} ${filterType === 'income' ? styles.active : ''}`}
                 style={{
                   padding: 'var(--space-2) var(--space-3)',
                   borderRadius: 'var(--radius-control)',
@@ -154,21 +148,12 @@ export default function TransactionsPage() {
                   fontWeight: '500',
                   transition: 'all 0.2s ease',
                 }}
-                onMouseEnter={(e) => {
-                  if (filterType !== 'income') {
-                    e.currentTarget.style.color = 'var(--text)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filterType !== 'income') {
-                    e.currentTarget.style.color = 'var(--text-muted)';
-                  }
-                }}
               >
                 Income
               </button>
               <button
                 onClick={() => setFilterType('all')}
+                className={`${styles.filterButton} ${filterType === 'all' ? styles.active : ''}`}
                 style={{
                   padding: 'var(--space-2) var(--space-3)',
                   borderRadius: 'var(--radius-control)',
@@ -179,16 +164,6 @@ export default function TransactionsPage() {
                   fontSize: 'var(--font-size-sm)',
                   fontWeight: '500',
                   transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (filterType !== 'all') {
-                    e.currentTarget.style.color = 'var(--text)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filterType !== 'all') {
-                    e.currentTarget.style.color = 'var(--text-muted)';
-                  }
                 }}
               >
                 All
@@ -211,17 +186,19 @@ export default function TransactionsPage() {
           </div>
         }
       />
-      <div style={{ padding: 'var(--card-padding)' }} className="page-container">
+      <div className={styles.pageContainer}>
 
       {/* Filters Card */}
-      <Card title="Filters" style={{ marginBottom: 'var(--space-4)' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 'var(--space-3)',
-          }}
+      <Card title="Filters" className={`${styles.filterCard} ${!isFiltersOpen ? styles.collapsed : ''}`} action={
+        <button
+          onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', color: 'var(--text)', display: 'none' }}
+          className={styles.toggleButton}
         >
+          {isFiltersOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+      }>
+        <div className={`${styles.filterGrid} ${isFiltersOpen ? styles.open : ''}`}>
           <Select
             label="Type"
             value={filterType}
@@ -286,66 +263,44 @@ export default function TransactionsPage() {
       ) : (
         <Card>
           <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ padding: 'var(--space-2)', textAlign: 'left', fontWeight: '600', color: 'var(--text-muted)' }}>Date</th>
-                  <th style={{ padding: 'var(--space-2)', textAlign: 'left', fontWeight: '600', color: 'var(--text-muted)' }}>Description</th>
-                  <th style={{ padding: 'var(--space-2)', textAlign: 'left', fontWeight: '600', color: 'var(--text-muted)' }}>Category</th>
-                  <th style={{ padding: 'var(--space-2)', textAlign: 'right', fontWeight: '600', color: 'var(--text-muted)' }}>Amount</th>
-                  <th style={{ padding: 'var(--space-2)', textAlign: 'center', fontWeight: '600', color: 'var(--text-muted)' }}>Action</th>
+            <table className={styles.transactionsTable}>
+              <thead className={styles.tableHeader}>
+                <tr>
+                  <th className={styles.tableHeaderCell}>Date</th>
+                  <th className={styles.tableHeaderCell}>Description</th>
+                  <th className={styles.tableHeaderCell}>Category</th>
+                  <th className={`${styles.tableHeaderCell} ${styles.right}`}>Amount</th>
+                  <th className={`${styles.tableHeaderCell} ${styles.center}`}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredAndSorted.map((transaction) => {
                   const category = categories.find((c) => c.id === transaction.categoryId);
                   return (
-                    <tr key={transaction.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: 'var(--space-2)', color: 'var(--text)' }}>
+                    <tr key={transaction.id} className={styles.tableRow}>
+                      <td className={styles.tableCell}>
                         {new Date(transaction.date).toLocaleDateString()} {new Date(transaction.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </td>
-                      <td style={{ padding: 'var(--space-2)', color: 'var(--text)' }}>
-                        <div>{transaction.merchant || 'Uncategorized'}</div>
+                      <td className={styles.tableCell}>
+                        <div className={styles.transactionMerchant}>{transaction.merchant || 'Uncategorized'}</div>
                         {transaction.notes && (
-                          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '4px' }}>
+                          <div className={styles.transactionNotes}>
                             {transaction.notes}
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: 'var(--space-2)' }}>
+                      <td className={styles.tableCell}>
                         {category ? <Badge variant="neutral">{category.name}</Badge> : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                       </td>
-                      <td
-                        style={{
-                          padding: 'var(--space-2)',
-                          textAlign: 'right',
-                          fontWeight: '600',
-                          color: transaction.type === 'income' ? 'var(--status-safe)' : 'var(--text)',
-                        }}
-                      >
-                        {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                      <td className={`${styles.tableCell} ${styles.right}`}>
+                        <span className={`${styles.transactionAmount} ${transaction.type === 'income' ? styles.income : ''}`}>
+                          {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                        </span>
                       </td>
-                      <td style={{ padding: 'var(--space-2)', textAlign: 'center' }}>
+                      <td className={`${styles.tableCell} ${styles.center}`}>
                         <button
                           onClick={() => setDeletingTransactionId(transaction.id)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--status-danger)',
-                            cursor: 'pointer',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            transition: 'all var(--transition-fast)',
-                          }}
+                          className={styles.deleteButton}
                           title="Delete transaction"
                         >
                           <Trash2 size={16} />
@@ -357,7 +312,7 @@ export default function TransactionsPage() {
               </tbody>
             </table>
           </div>
-          <div style={{ marginTop: 'var(--space-3)', padding: 'var(--space-2)', backgroundColor: 'var(--panel-2)', borderRadius: 'var(--radius-control)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+          <div className={styles.transactionCount}>
             Showing {filteredAndSorted.length} of {transactions.length} transactions
           </div>
         </Card>

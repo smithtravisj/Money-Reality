@@ -151,12 +151,22 @@
   }
 
   .summaryStats {
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
+    gap: 8px;
+    padding: 8px 0;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .statItem {
+    gap: 2px;
+  }
+
+  .statLabel {
+    font-size: 10px;
+    margin: 0;
   }
 
   .statValue {
-    font-size: var(--font-size-base);
+    font-size: 12px;
   }
 
   .progressSection {

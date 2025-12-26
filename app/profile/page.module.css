@@ -1,0 +1,12 @@
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -69,6 +69,29 @@
 /* Mobile adjustments */
 @media (max-width: 767px) {
   .accountsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .accountItem {
+    gap: 2px;
+    padding: 8px;
+  }
+
+  .name {
+    font-size: var(--font-size-base);
+  }
+
+  .balance {
+    font-size: var(--font-size-sm);
+    margin: 2px 0 0 0;
+  }
+
+  .type {
+    font-size: var(--font-size-2xs);
+  }
+
+  .transactionCount {
+    font-size: var(--font-size-2xs);
   }
 }
