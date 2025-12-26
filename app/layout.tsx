@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description: 'Your personal budget tracker - honest financial truth',
   icons: {
     icon: '/favicon.png',
-    apple: '/apple-touch-icon.png',
+    apple: '/favicon.png',
   },
   manifest: '/manifest.json',
 };
@@ -49,7 +49,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content="Money Reality" />
         <meta name="theme-color" content="#0b0f14" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/mask-icon.svg" color="#0b0f14" />
         <style>{`
